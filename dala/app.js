@@ -1,7 +1,6 @@
 const getid = (id) => document.getElementById(id);
 const findel = (sel) => document.querySelector(sel);
 
-// Main elements
 const useridbox = getid('userid');
 const customtxtbox = getid('customtxt');
 const loadbtn = getid('loadbtn');
@@ -11,7 +10,6 @@ const embedframe = getid('embedpreview');
 const notifcontainer = getid('notificationarea');
 const creditscontainer = getid('creditsinfo');
 
-// Display toggles
 const showartistbox = getid('showartist');
 const showprogressbox = getid('showprogress');
 const showalbumbox = getid('showalbum');
@@ -19,29 +17,23 @@ const showuserbox = getid('showuser');
 const showdurationbox = getid('showduration');
 const showstatusbox = getid('showstatus');
 
-// Theme buttons
 const darkmodebutton = getid('darkmode');
 const lightmodebutton = getid('lightmode');
 
-// Color pickers
 const songcolorpicker = getid('songcolor');
 const artistcolorpicker = getid('artistcolor');
 const usercolorpicker = getid('usercolor');
 const customtextcolorpicker = getid('customtextcolor');
 const progressbgcolorpicker = getid('progressbg');
 const progressfillcolorpicker = getid('progressfill');
-const progressendcolorpicker = getid('progressend');
 
-// Reset buttons
 const resetsongbtn = getid('resetsong');
 const resetartistbtn = getid('resetartist');
 const resetuserbtn = getid('resetuser');
 const resetcustomtextbtn = getid('resetcustomtext');
 const resetprogressbgbtn = getid('resetprogressbg');
 const resetprogressfillbtn = getid('resetprogressfill');
-const resetprogressendbtn = getid('resetprogressend');
 
-// Effect selectors
 const songtitleeffectsel = getid('songtitleeffect');
 const artisteffectsel = getid('artisteffect');
 const usernameeffectsel = getid('usernameeffect');
@@ -53,34 +45,29 @@ const progressstylesel = getid('progressstyle');
 const progressheightslider = getid('progressheight');
 const progressradiusslider = getid('progressradius');
 
-// App state
 let currentuser = null;
 let userdata = null;
 let refreshinterval = null;
 let islighttheme = false;
 
-// Default colors
 const defaultdarkcolors = {
   song: '#ffffff',
-  artist: '#b3b3b3',
-  username: '#888888',
-  customtext: '#888888',
-  progressbg: '#2a2a2a',
-  progressfill: '#00d9ff',
-  progressend: '#0ea5e9'
+  artist: '#cccccc',
+  username: '#999999',
+  customtext: '#999999',
+  progressbg: '#333333',
+  progressfill: '#ffffff'
 };
 
 const defaultlightcolors = {
-  song: '#0b0b0b',
-  artist: '#4a4a4a',
+  song: '#000000',
+  artist: '#333333',
   username: '#666666',
   customtext: '#666666',
   progressbg: '#e0e0e0',
-  progressfill: '#00d9ff',
-  progressend: '#0ea5e9'
+  progressfill: '#000000'
 };
 
-// Utility functions
 function shownotif(message, type = 'info') {
   const notif = document.createElement('div');
   notif.className = `notification ${type}`;
@@ -123,16 +110,13 @@ function buildembed(userid) {
     theme: islighttheme ? 'light' : 'dark',
     custom: customtxtbox.value || '',
     
-    // Colors
     songColor: songcolorpicker.value !== getdefaultcolor('song') ? songcolorpicker.value : '',
     artistColor: artistcolorpicker.value !== getdefaultcolor('artist') ? artistcolorpicker.value : '',
     usernameColor: usercolorpicker.value !== getdefaultcolor('username') ? usercolorpicker.value : '',
     customTextColor: customtextcolorpicker.value !== getdefaultcolor('customtext') ? customtextcolorpicker.value : '',
     progressBgColor: progressbgcolorpicker.value !== getdefaultcolor('progressbg') ? progressbgcolorpicker.value : '',
     progressFillColor: progressfillcolorpicker.value !== getdefaultcolor('progressfill') ? progressfillcolorpicker.value : '',
-    progressEndColor: progressendcolorpicker.value !== getdefaultcolor('progressend') ? progressendcolorpicker.value : '',
     
-    // Effects
     songEffect: songtitleeffectsel.value,
     artistEffect: artisteffectsel.value,
     usernameEffect: usernameeffectsel.value,
@@ -160,7 +144,6 @@ function updatecolors() {
   rootstyle.style.setProperty('--customtext-color', customtextcolorpicker.value);
   rootstyle.style.setProperty('--progress-bg-color', progressbgcolorpicker.value);
   rootstyle.style.setProperty('--progress-fill-color', progressfillcolorpicker.value);
-  rootstyle.style.setProperty('--progress-fill-end-color', progressendcolorpicker.value);
   rootstyle.style.setProperty('--progress-height', progressheightslider.value + 'px');
   rootstyle.style.setProperty('--progress-radius', progressradiusslider.value + 'px');
 }
@@ -172,7 +155,6 @@ function resetallcolors() {
   customtextcolorpicker.value = getdefaultcolor('customtext');
   progressbgcolorpicker.value = getdefaultcolor('progressbg');
   progressfillcolorpicker.value = getdefaultcolor('progressfill');
-  progressendcolorpicker.value = getdefaultcolor('progressend');
   updatecolors();
 }
 
@@ -231,7 +213,6 @@ function switchtheme(lightmode) {
   updateembedframe();
 }
 
-// Event listeners
 loadbtn.addEventListener('click', async () => {
   const userid = useridbox.value.trim();
   if (!userid) {
@@ -284,14 +265,13 @@ copyembedurl.addEventListener('click', async () => {
   }
 });
 
-// Add event listeners for all controls
 [customtxtbox, showartistbox, showprogressbox, showalbumbox, showuserbox, 
  showdurationbox, showstatusbox].forEach((element) => {
   element.addEventListener('input', updateembedframe);
 });
 
 [songcolorpicker, artistcolorpicker, usercolorpicker, customtextcolorpicker,
- progressbgcolorpicker, progressfillcolorpicker, progressendcolorpicker].forEach(colorinput => {
+ progressbgcolorpicker, progressfillcolorpicker].forEach(colorinput => {
   colorinput.addEventListener('input', () => {
     updatecolors();
     updateembedframe();
@@ -310,7 +290,6 @@ copyembedurl.addEventListener('click', async () => {
   });
 });
 
-// Reset button event listeners
 resetsongbtn.addEventListener('click', () => {
   songcolorpicker.value = getdefaultcolor('song');
   updatecolors();
@@ -347,22 +326,13 @@ resetprogressfillbtn.addEventListener('click', () => {
   updateembedframe();
 });
 
-resetprogressendbtn.addEventListener('click', () => {
-  progressendcolorpicker.value = getdefaultcolor('progressend');
-  updatecolors();
-  updateembedframe();
-});
-
-// Theme switchers
 darkmodebutton.addEventListener('click', () => switchtheme(false));
 lightmodebutton.addEventListener('click', () => switchtheme(true));
 
-// Cleanup on page unload
 window.addEventListener('beforeunload', () => {
   stoprefreshloop();
 });
 
-// Credits section
 async function loadcreditsinfo() {
   const userids = ['1170109139989561464', '1106121476932898946'];
   
@@ -416,17 +386,14 @@ async function loadcreditsinfo() {
   }
 }
 
-// Initialize app
 function initapp() {
   resetallcolors();
   updateembedframe();
   loadcreditsinfo();
   
-  // Set initial slider values
   progressheightslider.value = 6;
   progressradiusslider.value = 3;
   updatecolors();
 }
 
-// Start the app
 initapp();
