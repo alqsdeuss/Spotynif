@@ -33,6 +33,7 @@
       const songColor = params.get('songColor') || '';
       const artistColor = params.get('artistColor') || '';
       const usernameColor = params.get('usernameColor') || '';
+      const progressColor = params.get('progressColor') || '';
 
       // Apply theme
       if (theme === 'light') {
@@ -44,6 +45,7 @@
       if (songColor) root.style.setProperty('--song-color', songColor);
       if (artistColor) root.style.setProperty('--artist-color', artistColor);
       if (usernameColor) root.style.setProperty('--username-color', usernameColor);
+      if (progressColor) root.style.setProperty('--progress-color', progressColor);
 
       const rootEl = document.getElementById('root');
 
