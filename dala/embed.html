@@ -6,17 +6,19 @@
   <title>Embed — Spotify Status Card</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    /* small override: make embed full-bleed */
+    /* Embed-specific overrides */
     html,body,#root{height:100%; margin:0}
     body{display:flex; align-items:center; justify-content:center; padding:8px}
     .container{width:100%; max-width:420px}
+    
+    /* Custom color variables will be set by JavaScript */
   </style>
 </head>
 <body>
   <div id="root" class="container"></div>
 
   <script>
-    // embed script: read params, fetch snapshot + websocket, render simple card
+    // Enhanced embed script with color support
     (function(){
       const params = new URLSearchParams(location.search);
       const id = params.get('id') || params.get('uid') || '';
@@ -25,26 +27,37 @@
       const showAlbum = params.get('showAlbum') !== 'false';
       const showUsername = params.get('showUsername') !== 'false';
       const theme = params.get('theme') === 'light' ? 'light' : 'dark';
+      const customText = params.get('custom') || '';
+      
+      // Custom colors from URL params
+      const songColor = params.get('songColor') || '';
+      const artistColor = params.get('artistColor') || '';
+      const usernameColor = params.get('usernameColor') || '';
 
-      if (theme === 'light') document.body.classList.add('light');
+      // Apply theme
+      if (theme === 'light') {
+        document.body.classList.add('card-light');
+      }
 
-      const root = document.getElementById('root');
+      // Apply custom colors
+      const root = document.documentElement;
+      if (songColor) root.style.setProperty('--song-color', songColor);
+      if (artistColor) root.style.setProperty('--artist-color', artistColor);
+      if (usernameColor) root.style.setProperty('--username-color', usernameColor);
+
+      const rootEl = document.getElementById('root');
 
       if (!id){
-        root.innerHTML = '<div class="player"><div class="meta"><div class="song">Missing id</div></div></div>';
+        rootEl.innerHTML = '<div class="player"><div class="meta"><div class="song">Missing ID</div><div class="artist">Please provide a Discord user ID</div></div></div>';
         return;
       }
 
-      // inject same CSS used by app (we assume /dala/styles.css exists)
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = '/dala/styles.css';
-      document.head.appendChild(link);
-
-      // helper functions
+      // Helper functions
       const fmt = ms => {
         if (!ms) return '0:00';
-        const s = Math.floor(ms/1000), m = Math.floor(s/60), ss = String(s%60).padStart(2,'0');
+        const s = Math.floor(ms/1000);
+        const m = Math.floor(s/60);
+        const ss = String(s%60).padStart(2,'0');
         return `${m}:${ss}`;
       };
 
@@ -52,96 +65,198 @@
 
       function computeProgress(spotify){
         if (!spotify || !spotify.timestamps) return null;
-        const start = spotify.timestamps.start, end = spotify.timestamps.end;
-        if (!start||!end) return null;
-        const dur = end - start; const elapsed = Date.now() - start; const pct = Math.max(0, Math.min(1, elapsed/dur));
+        const start = spotify.timestamps.start;
+        const end = spotify.timestamps.end;
+        if (!start || !end) return null;
+        const dur = end - start;
+        const elapsed = Date.now() - start;
+        const pct = Math.max(0, Math.min(1, elapsed/dur));
         return { elapsed, dur, pct };
       }
 
       function render(){
+        if (raf) cancelAnimationFrame(raf);
+        
         if (!presence){
-          root.innerHTML = `<div class="player"><div class="meta"><div class="song">No data</div></div></div>`; return;
+          rootEl.innerHTML = '<div class="player"><div class="meta"><div class="song">No data</div><div class="artist muted">Connecting...</div></div></div>';
+          return;
         }
+
         const spotify = presence.spotify ?? null;
         const username = presence.discord_user?.username ?? null;
-        root.innerHTML = '';
-        const card = document.createElement('div'); card.className='player';
+        
+        rootEl.innerHTML = '';
+        
+        const card = document.createElement('div');
+        card.className = 'player';
+        
+        // Album art
         if (showAlbum && spotify?.album_art_url){
-          const img = document.createElement('img'); img.className='art'; img.src = spotify.album_art_url; card.appendChild(img);
+          const img = document.createElement('img');
+          img.className = 'art';
+          img.src = spotify.album_art_url;
+          img.onerror = () => img.style.display = 'none';
+          card.appendChild(img);
         }
-        const meta = document.createElement('div'); meta.className='meta';
-        const song = document.createElement('div'); song.className='song'; song.textContent = spotify?.song ?? '— Not listening';
+        
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        
+        // Song title
+        const song = document.createElement('div');
+        song.className = 'song';
+        song.textContent = spotify?.song ?? '— Not listening';
         meta.appendChild(song);
-        if (showArtist){
-          const artist = document.createElement('div'); artist.className='artist'; artist.textContent = spotify?.artist ?? ''; meta.appendChild(artist);
+        
+        // Artist
+        if (showArtist && spotify?.artist){
+          const artist = document.createElement('div');
+          artist.className = 'artist';
+          artist.textContent = spotify.artist;
+          meta.appendChild(artist);
         }
+        
+        // Username
         if (showUsername && username){
-          const un = document.createElement('div'); un.className='username muted'; un.textContent = `@${username}`; meta.appendChild(un);
+          const un = document.createElement('div');
+          un.className = 'username';
+          un.textContent = `@${username}`;
+          meta.appendChild(un);
         }
-        if (showProgress){
-          const timeRow = document.createElement('div'); timeRow.className='time-row';
-          const left = document.createElement('span'); left.textContent='--:--';
-          const right = document.createElement('span'); right.textContent='--:--';
-          timeRow.appendChild(left); timeRow.appendChild(right);
-          const bar = document.createElement('div'); bar.className='progress-bar';
-          const fill = document.createElement('div'); fill.className='progress-fill'; bar.appendChild(fill);
-          meta.appendChild(timeRow); meta.appendChild(bar);
+        
+        // Custom text
+        if (customText){
+          const custom = document.createElement('div');
+          custom.className = 'custom-text';
+          custom.textContent = customText;
+          meta.appendChild(custom);
+        }
+        
+        // Progress bar
+        if (showProgress && spotify){
+          const timeRow = document.createElement('div');
+          timeRow.className = 'time-row';
+          const left = document.createElement('span');
+          const right = document.createElement('span');
+          left.textContent = '--:--';
+          right.textContent = '--:--';
+          timeRow.appendChild(left);
+          timeRow.appendChild(right);
+          
+          const bar = document.createElement('div');
+          bar.className = 'progress-bar';
+          const fill = document.createElement('div');
+          fill.className = 'progress-fill';
+          bar.appendChild(fill);
+          
+          meta.appendChild(timeRow);
+          meta.appendChild(bar);
 
-          // animation loop
+          // Animation loop for progress
           function tick(){
             const p = computeProgress(spotify);
-            if (p){
+            if (p && spotify.timestamps){
               left.textContent = fmt(p.elapsed);
               right.textContent = fmt(p.dur);
               fill.style.transform = `scaleX(${p.pct})`;
-            } else { left.textContent='--:--'; right.textContent='--:--'; fill.style.transform='scaleX(0)'; }
+            } else {
+              left.textContent = '--:--';
+              right.textContent = '--:--';
+              fill.style.transform = 'scaleX(0)';
+            }
             raf = requestAnimationFrame(tick);
           }
           tick();
         }
 
         card.appendChild(meta);
-        root.appendChild(card);
+        rootEl.appendChild(card);
       }
 
-      async function fetchSnap(){
+      async function fetchSnapshot(){
         try{
-          const r = await fetch(`https://api.lanyard.rest/v1/users/${id}`);
-          const j = await r.json();
-          if (j && j.success && j.data){ presence = j.data; render(); }
-        }catch(e){ /* ignore */ }
+          const response = await fetch(`https://api.lanyard.rest/v1/users/${id}`);
+          const json = await response.json();
+          if (json && json.success && json.data){
+            presence = json.data;
+            render();
+          }
+        } catch(e) {
+          console.warn('Failed to fetch snapshot:', e);
+        }
       }
 
       function openSocket(){
+        if (ws) {
+          ws.close();
+        }
+        
         ws = new WebSocket('wss://api.lanyard.rest/socket');
-        ws.addEventListener('message', (ev)=>{
+        
+        ws.addEventListener('open', () => {
+          console.log('WebSocket connected');
+        });
+        
+        ws.addEventListener('message', (event) => {
           try{
-            const m = JSON.parse(ev.data);
-            const { op, d, t } = m;
+            const message = JSON.parse(event.data);
+            const { op, d, t } = message;
+            
             if (op === 1 && d?.heartbeat_interval){
-              ws.send(JSON.stringify({ op: 2, d: { subscribe_to_id: id } }));
+              // Send subscription
+              ws.send(JSON.stringify({ 
+                op: 2, 
+                d: { subscribe_to_id: id } 
+              }));
+              
+              // Start heartbeat
               if (heartbeat) clearInterval(heartbeat);
-              heartbeat = setInterval(()=> { if (ws && ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({ op:3 })); }, d.heartbeat_interval);
-            } else if (op === 0){
+              heartbeat = setInterval(() => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                  ws.send(JSON.stringify({ op: 3 }));
+                }
+              }, d.heartbeat_interval);
+              
+            } else if (op === 0) {
               if (t === 'INIT_STATE'){
                 presence = d[id] ?? d;
-                render();
               } else if (t === 'PRESENCE_UPDATE'){
                 presence = d;
-                render();
               }
+              render();
             }
-          }catch(e){}
+          } catch(e) {
+            console.warn('WebSocket message error:', e);
+          }
         });
-        ws.addEventListener('close', ()=>{ if (heartbeat) clearInterval(heartbeat); });
+
+        ws.addEventListener('close', (event) => {
+          console.log('WebSocket closed:', event.code, event.reason);
+          if (heartbeat) {
+            clearInterval(heartbeat);
+            heartbeat = null;
+          }
+          
+          // Retry connection after 3 seconds if not intentionally closed
+          if (event.code !== 1000) {
+            setTimeout(openSocket, 3000);
+          }
+        });
+
+        ws.addEventListener('error', (error) => {
+          console.warn('WebSocket error:', error);
+        });
       }
 
-      fetchSnap();
+      // Initialize
+      fetchSnapshot();
       openSocket();
 
-      // cleanup on unload
-      window.addEventListener('unload', ()=> {
-        if (ws) try{ ws.close(); }catch(e){}
+      // Cleanup on page unload
+      window.addEventListener('beforeunload', () => {
+        if (ws) {
+          try { ws.close(1000); } catch(e) {}
+        }
         if (heartbeat) clearInterval(heartbeat);
         if (raf) cancelAnimationFrame(raf);
       });
