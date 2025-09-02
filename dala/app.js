@@ -28,9 +28,8 @@ const resetprogressfillbtn = getid('resetprogressfill');
 const resetprogressendbtn = getid('resetprogressend');
 
 let currentuser = null;
-let pollingInterval = null;
 let userdata = null;
-let animframe = null;
+let refreshinterval = null;
 let islighttheme = false;
 
 const defaultdarkcolors = {
@@ -134,43 +133,25 @@ async function fetchuserdata(userid) {
   return null;
 }
 
-function startwebsocket(userid) {
-  closesocket();
-  startpolling(userid);
-}
-
-function startpolling(userid) {
-  // Use HTTP polling instead of WebSocket since Lanyard doesn't support direct user WebSocket connections
-  if (heartbeatloop) {
-    clearInterval(heartbeatloop);
-  }
-  
-  // Initial fetch
-  fetchuserdata(userid).then(data => {
-    if (data) {
-      userdata = data;
-      renderplayer();
-    }
-  });
-  
-  // Poll every 15 seconds for updates
-  heartbeatloop = setInterval(async () => {
+function startrefreshloop(userid) {
+  stoprefreshloop();
+  refreshinterval = setInterval(async () => {
     try {
-      const data = await fetchuserdata(userid);
-      if (data) {
-        userdata = data;
+      const newdata = await fetchuserdata(userid);
+      if (newdata) {
+        userdata = newdata;
         renderplayer();
       }
     } catch (error) {
-      console.warn('Polling update failed:', error);
+      console.error('refresh error:', error);
     }
   }, 15000);
 }
 
-function closesocket() {
-  if (pollingInterval) {
-    clearInterval(pollingInterval);
-    pollingInterval = null;
+function stoprefreshloop() {
+  if (refreshinterval) {
+    clearInterval(refreshinterval);
+    refreshinterval = null;
   }
 }
 
@@ -235,8 +216,8 @@ loadbtn.addEventListener('click', async () => {
     currentuser = userid;
     userdata = await fetchuserdata(userid);
     renderplayer();
-    startwebsocket(userid);
-    shownotif('Discord data loaded successfully! Updates every 15 seconds.', 'success');
+    startrefreshloop(userid);
+    shownotif('Discord data loaded successfully! (Updates every 15 seconds)', 'success');
   } catch (error) {
     console.error('loading error:', error);
     shownotif('Failed to load Discord data. Please check the ID and try again.', 'error');
@@ -252,7 +233,7 @@ clearbtn.addEventListener('click', () => {
   currentuser = null;
   userdata = null;
   renderplayer();
-  closesocket();
+  stoprefreshloop();
 });
 
 copyembedurl.addEventListener('click', async () => {
@@ -323,10 +304,7 @@ darkmodebutton.addEventListener('click', () => switchtheme(false));
 lightmodebutton.addEventListener('click', () => switchtheme(true));
 
 window.addEventListener('beforeunload', () => {
-  closesocket();
-  if (animframe) {
-    cancelAnimationFrame(animframe);
-  }
+  stoprefreshloop();
 });
 
 async function loadcreditsinfo() {
