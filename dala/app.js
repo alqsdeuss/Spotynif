@@ -1,341 +1,424 @@
-const qs = (s) => document.querySelector(s);
-const byId = (id) => document.getElementById(id);
+const getid = (id) => document.getElementById(id);
+const findel = (sel) => document.querySelector(sel);
 
-const inputId = byId('inputId');
-const inputCustom = byId('inputCustom');
-const btnLoad = byId('btnLoad');
-const btnClear = byId('btnClear');
-const btnCopyEmbed = byId('btnCopyEmbed');
-const playerContainer = byId('playerContainer');
-const iframePreview = byId('iframePreview');
+const useridbox = getid('userid');
+const customtxtbox = getid('customtxt');
+const loadbtn = getid('loadbtn');
+const clearbtn = getid('clearbtn');
+const copyembedurl = getid('copyembed');
+const playercontainer = getid('playerbox');
+const embedframe = getid('embedpreview');
 
-const optArtist = byId('optArtist');
-const optProgress = byId('optProgress');
-const optAlbum = byId('optAlbum');
-const optUsername = byId('optUsername');
-const themeDark = byId('themeDark');
-const themeLight = byId('themeLight');
+const showartistbox = getid('showartist');
+const showprogressbox = getid('showprogress');
+const showalbumbox = getid('showalbum');
+const showuserbox = getid('showuser');
+const darkmodebutton = getid('darkmode');
+const lightmodebutton = getid('lightmode');
 
-// Color controls
-const colorSong = byId('colorSong');
-const colorArtist = byId('colorArtist');
-const colorUsername = byId('colorUsername');
-const colorProgress = byId('colorProgress');
-const resetSong = byId('resetSong');
-const resetArtist = byId('resetArtist');
-const resetUsername = byId('resetUsername');
-const resetProgress = byId('resetProgress');
+const songcolorpicker = getid('songcolor');
+const artistcolorpicker = getid('artistcolor');
+const usercolorpicker = getid('usercolor');
+const progressbgcolorpicker = getid('progressbg');
+const progressfillcolorpicker = getid('progressfill');
+const progressendcolorpicker = getid('progressend');
 
-let currentUserId = null;
-let ws = null;
-let heartbeatIntervalId = null;
-let latestPresence = null;
-let rafId = null;
-let isCardLightTheme = false;
+const resetsongbtn = getid('resetsong');
+const resetartistbtn = getid('resetartist');
+const resetuserbtn = getid('resetuser');
+const resetprogressbgbtn = getid('resetprogressbg');
+const resetprogressfillbtn = getid('resetprogressfill');
+const resetprogressendbtn = getid('resetprogressend');
 
-// Default colors
-const defaultColors = {
-  song: '#e8e8e8',
-  artist: '#888888',
-  username: '#888888',
-  progress: '#00d474'
-};
+let currentuser = null;
+let websocket = null;
+let heartbeatloop = null;
+let userdata = null;
+let animframe = null;
+let islighttheme = false;
 
-const defaultColorsLight = {
-  song: '#1a1a1a',
-  artist: '#666666',
+const defaultdarkcolors = {
+  song: '#ffffff',
+  artist: '#b3b3b3',
   username: '#666666',
-  progress: '#00d474'
+  progressbg: '#2a2a2a',
+  progressfill: '#1DB954',
+  progressend: '#1ed760'
 };
 
-function buildEmbed(userId) {
+const defaultlightcolors = {
+  song: '#0b0b0b',
+  artist: '#4a4a4a',
+  username: '#888888',
+  progressbg: '#e0e0e0',
+  progressfill: '#1DB954',
+  progressend: '#1ed760'
+};
+
+function buildembed(userid) {
   const params = new URLSearchParams({
-    showArtist: String(optArtist.checked),
-    showProgress: String(optProgress.checked),
-    showAlbum: String(optAlbum.checked),
-    showUsername: String(optUsername.checked),
-    theme: isCardLightTheme ? 'light' : 'dark',
-    custom: inputCustom.value || '',
-    songColor: colorSong.value !== getDefaultColor('song') ? colorSong.value : '',
-    artistColor: colorArtist.value !== getDefaultColor('artist') ? colorArtist.value : '',
-    usernameColor: colorUsername.value !== getDefaultColor('username') ? colorUsername.value : '',
-    progressColor: colorProgress.value !== getDefaultColor('progress') ? colorProgress.value : ''
+    showArtist: String(showartistbox.checked),
+    showProgress: String(showprogressbox.checked),
+    showAlbum: String(showalbumbox.checked),
+    showUsername: String(showuserbox.checked),
+    theme: islighttheme ? 'light' : 'dark',
+    custom: customtxtbox.value || '',
+    songColor: songcolorpicker.value !== getdefaultcolor('song') ? songcolorpicker.value : '',
+    artistColor: artistcolorpicker.value !== getdefaultcolor('artist') ? artistcolorpicker.value : '',
+    usernameColor: usercolorpicker.value !== getdefaultcolor('username') ? usercolorpicker.value : '',
+    progressBgColor: progressbgcolorpicker.value !== getdefaultcolor('progressbg') ? progressbgcolorpicker.value : '',
+    progressFillColor: progressfillcolorpicker.value !== getdefaultcolor('progressfill') ? progressfillcolorpicker.value : '',
+    progressEndColor: progressendcolorpicker.value !== getdefaultcolor('progressend') ? progressendcolorpicker.value : ''
   });
-  return `${location.origin}/dala/embed.html?id=${encodeURIComponent(userId)}&${params.toString()}`;
+  return `${location.origin}/dala/embed.html?id=${encodeURIComponent(userid)}&${params.toString()}`;
 }
 
-function getDefaultColor(type) {
-  return isCardLightTheme ? defaultColorsLight[type] : defaultColors[type];
+function getdefaultcolor(colortype) {
+  return islighttheme ? defaultlightcolors[colortype] : defaultdarkcolors[colortype];
 }
 
-function updateColors() {
-  const root = document.documentElement;
-  root.style.setProperty('--song-color', colorSong.value);
-  root.style.setProperty('--artist-color', colorArtist.value);
-  root.style.setProperty('--username-color', colorUsername.value);
-  root.style.setProperty('--progress-color', colorProgress.value);
+function updatecolors() {
+  const rootstyle = document.documentElement;
+  rootstyle.style.setProperty('--song-color', songcolorpicker.value);
+  rootstyle.style.setProperty('--artist-color', artistcolorpicker.value);
+  rootstyle.style.setProperty('--username-color', usercolorpicker.value);
+  rootstyle.style.setProperty('--progress-bg-color', progressbgcolorpicker.value);
+  rootstyle.style.setProperty('--progress-fill-color', progressfillcolorpicker.value);
+  rootstyle.style.setProperty('--progress-fill-end-color', progressendcolorpicker.value);
 }
 
-function resetColorInputs() {
-  colorSong.value = getDefaultColor('song');
-  colorArtist.value = getDefaultColor('artist');
-  colorUsername.value = getDefaultColor('username');
-  colorProgress.value = getDefaultColor('progress');
-  updateColors();
+function resetallcolors() {
+  songcolorpicker.value = getdefaultcolor('song');
+  artistcolorpicker.value = getdefaultcolor('artist');
+  usercolorpicker.value = getdefaultcolor('username');
+  progressbgcolorpicker.value = getdefaultcolor('progressbg');
+  progressfillcolorpicker.value = getdefaultcolor('progressfill');
+  progressendcolorpicker.value = getdefaultcolor('progressend');
+  updatecolors();
 }
 
-async function fetchSnapshot(uid) {
+async function fetchuserdata(userid) {
   try {
-    const res = await fetch(`https://api.lanyard.rest/v1/users/${uid}`);
-    const j = await res.json();
-    if (j?.success && j.data) return j.data;
-  } catch {}
+    const response = await fetch(`https://api.lanyard.rest/v1/users/${userid}`);
+    const data = await response.json();
+    if (data?.success && data.data) return data.data;
+  } catch (error) {
+    console.error('fetch error:', error);
+  }
   return null;
 }
 
-function openLanyardSocket(uid) {
-  closeSocket();
-  ws = new WebSocket('wss://api.lanyard.rest/socket');
-  ws.addEventListener('message', (ev) => {
+function startwebsocket(userid) {
+  closesocket();
+  websocket = new WebSocket('wss://api.lanyard.rest/socket');
+  
+  websocket.addEventListener('message', (event) => {
     try {
-      const { op, d, t } = JSON.parse(ev.data);
+      const message = JSON.parse(event.data);
+      const { op, d, t } = message;
+      
       if (op === 1 && d?.heartbeat_interval) {
-        ws.send(JSON.stringify({ op: 2, d: { subscribe_to_id: uid } }));
-        heartbeatIntervalId = setInterval(() => {
-          if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ op: 3 }));
+        websocket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: userid } }));
+        heartbeatloop = setInterval(() => {
+          if (websocket.readyState === WebSocket.OPEN) {
+            websocket.send(JSON.stringify({ op: 3 }));
+          }
         }, d.heartbeat_interval);
       } else if (op === 0) {
-        latestPresence = t === 'INIT_STATE' ? d[uid] ?? d : d;
-        renderPlayer();
+        userdata = t === 'INIT_STATE' ? d[userid] ?? d : d;
+        renderplayer();
       }
-    } catch {}
+    } catch (error) {
+      console.error('websocket message error:', error);
+    }
+  });
+  
+  websocket.addEventListener('error', (error) => {
+    console.error('websocket error:', error);
+  });
+  
+  websocket.addEventListener('close', () => {
+    console.log('websocket closed');
+    if (heartbeatloop) {
+      clearInterval(heartbeatloop);
+      heartbeatloop = null;
+    }
   });
 }
 
-function closeSocket() {
-  if (heartbeatIntervalId) clearInterval(heartbeatIntervalId);
-  if (ws) ws.close();
-  heartbeatIntervalId = null;
-  ws = null;
+function closesocket() {
+  if (heartbeatloop) {
+    clearInterval(heartbeatloop);
+    heartbeatloop = null;
+  }
+  if (websocket) {
+    websocket.close();
+    websocket = null;
+  }
 }
 
-function fmt(ms) {
-  if (!ms) return '0:00';
-  const s = Math.floor(ms / 1000);
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+function formattime(milliseconds) {
+  if (!milliseconds) return '0:00';
+  const totalseconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(totalseconds / 60);
+  const seconds = String(totalseconds % 60).padStart(2, '0');
+  return `${minutes}:${seconds}`;
 }
 
-function computeProgress(spotify) {
-  if (!spotify?.timestamps) return null;
-  const { start, end } = spotify.timestamps;
-  const dur = end - start;
-  const elapsed = Date.now() - start;
-  return { elapsed, dur, pct: Math.min(1, Math.max(0, elapsed / dur)) };
+function calculateprogress(spotifydata) {
+  if (!spotifydata?.timestamps) return null;
+  const starttime = spotifydata.timestamps.start;
+  const endtime = spotifydata.timestamps.end;
+  if (!starttime || !endtime) return null;
+  
+  const totalduration = endtime - starttime;
+  const currentelapsed = Date.now() - starttime;
+  const progresspercent = Math.min(1, Math.max(0, currentelapsed / totalduration));
+  
+  return { 
+    elapsed: currentelapsed, 
+    duration: totalduration, 
+    percent: progresspercent 
+  };
 }
 
-function renderPlayer() {
-  cancelAnimationFrame(rafId);
-  playerContainer.innerHTML = '';
+function renderplayer() {
+  if (animframe) {
+    cancelAnimationFrame(animframe);
+  }
+  
+  playercontainer.innerHTML = '';
+  playercontainer.className = islighttheme ? 'card-light' : '';
 
-  // Update player container theme class
-  playerContainer.className = isCardLightTheme ? 'card-light' : '';
-
-  if (!latestPresence) {
-    playerContainer.innerHTML = `<div class="player"><div class="meta"><div class="song">No data</div><div class="artist muted">Enter a valid Discord ID</div></div></div>`;
-    updateIframe();
+  if (!userdata) {
+    playercontainer.innerHTML = `
+      <div class="player">
+        <div class="meta">
+          <div class="song">No data available</div>
+          <div class="artist">Enter a valid Discord ID</div>
+        </div>
+      </div>`;
+    updateembedframe();
     return;
   }
 
-  const { spotify, discord_user } = latestPresence;
-  const username = discord_user?.username;
-  const customText = inputCustom.value.trim();
+  const spotifyinfo = userdata.spotify;
+  const discorduser = userdata.discord_user;
+  const username = discorduser?.username;
+  const customtext = customtxtbox.value.trim();
 
-  const card = document.createElement('div');
-  card.className = 'player';
+  const playercard = document.createElement('div');
+  playercard.className = 'player';
 
-  if (optAlbum.checked && spotify?.album_art_url) {
-    const img = document.createElement('img');
-    img.className = 'art';
-    img.src = spotify.album_art_url;
-    card.appendChild(img);
+  if (showalbumbox.checked && spotifyinfo?.album_art_url) {
+    const albumimage = document.createElement('img');
+    albumimage.className = 'art';
+    albumimage.src = spotifyinfo.album_art_url;
+    albumimage.onerror = () => albumimage.style.display = 'none';
+    playercard.appendChild(albumimage);
   }
 
-  const meta = document.createElement('div');
-  meta.className = 'meta';
+  const metadata = document.createElement('div');
+  metadata.className = 'meta';
 
-  const title = document.createElement('div');
-  title.className = 'song';
-  title.textContent = spotify?.song ?? '— Not listening';
-  meta.appendChild(title);
+  const songtitle = document.createElement('div');
+  songtitle.className = 'song';
+  songtitle.textContent = spotifyinfo?.song ?? '— Not listening';
+  metadata.appendChild(songtitle);
 
-  if (optArtist.checked) {
-    const artist = document.createElement('div');
-    artist.className = 'artist';
-    artist.textContent = spotify?.artist ?? '';
-    meta.appendChild(artist);
+  if (showartistbox.checked && spotifyinfo?.artist) {
+    const artistname = document.createElement('div');
+    artistname.className = 'artist';
+    artistname.textContent = spotifyinfo.artist;
+    metadata.appendChild(artistname);
   }
 
-  if (optUsername.checked && username) {
-    const userEl = document.createElement('div');
-    userEl.className = 'username';
-    userEl.textContent = `@${username}`;
-    meta.appendChild(userEl);
+  if (showuserbox.checked && username) {
+    const usernametext = document.createElement('div');
+    usernametext.className = 'username';
+    usernametext.textContent = `@${username}`;
+    metadata.appendChild(usernametext);
   }
 
-  if (customText) {
-    const customEl = document.createElement('div');
-    customEl.className = 'custom-text';
-    customEl.textContent = customText;
-    meta.appendChild(customEl);
+  if (customtext) {
+    const customtextdiv = document.createElement('div');
+    customtextdiv.className = 'custom-text';
+    customtextdiv.textContent = customtext;
+    metadata.appendChild(customtextdiv);
   }
 
-  if (optProgress.checked) {
-    const timeRow = document.createElement('div');
-    timeRow.className = 'time-row';
-    const left = document.createElement('span');
-    const right = document.createElement('span');
-    timeRow.append(left, right);
+  if (showprogressbox.checked && spotifyinfo) {
+    const timerow = document.createElement('div');
+    timerow.className = 'time-row';
+    const currenttime = document.createElement('span');
+    const totaltime = document.createElement('span');
+    timerow.appendChild(currenttime);
+    timerow.appendChild(totaltime);
 
-    const bar = document.createElement('div');
-    bar.className = 'progress-bar';
-    const fill = document.createElement('div');
-    fill.className = 'progress-fill';
-    bar.appendChild(fill);
+    const progressbar = document.createElement('div');
+    progressbar.className = 'progress-bar';
+    const progressfill = document.createElement('div');
+    progressfill.className = 'progress-fill';
+    progressbar.appendChild(progressfill);
 
-    meta.append(timeRow, bar);
+    metadata.appendChild(timerow);
+    metadata.appendChild(progressbar);
 
-    function tick() {
-      const progress = computeProgress(spotify);
-      if (progress) {
-        left.textContent = fmt(progress.elapsed);
-        right.textContent = fmt(progress.dur);
-        fill.style.transform = `scaleX(${progress.pct})`;
+    function updateprogress() {
+      const progress = calculateprogress(spotifyinfo);
+      if (progress && spotifyinfo.timestamps) {
+        currenttime.textContent = formattime(progress.elapsed);
+        totaltime.textContent = formattime(progress.duration);
+        progressfill.style.transform = `scaleX(${progress.percent})`;
       } else {
-        left.textContent = right.textContent = '--:--';
-        fill.style.transform = 'scaleX(0)';
+        currenttime.textContent = '--:--';
+        totaltime.textContent = '--:--';
+        progressfill.style.transform = 'scaleX(0)';
       }
-      rafId = requestAnimationFrame(tick);
+      animframe = requestAnimationFrame(updateprogress);
     }
-    tick();
+    updateprogress();
   }
 
-  card.appendChild(meta);
-  playerContainer.appendChild(card);
-  updateIframe();
+  playercard.appendChild(metadata);
+  playercontainer.appendChild(playercard);
+  updateembedframe();
 }
 
-function switchTheme(isLight) {
-  isCardLightTheme = isLight;
+function switchtheme(lightmode) {
+  islighttheme = lightmode;
   
-  if (isLight) {
-    themeLight.classList.add('active');
-    themeDark.classList.remove('active');
+  if (lightmode) {
+    lightmodebutton.classList.add('btn-active');
+    darkmodebutton.classList.remove('btn-active');
   } else {
-    themeDark.classList.add('active');
-    themeLight.classList.remove('active');
+    darkmodebutton.classList.add('btn-active');
+    lightmodebutton.classList.remove('btn-active');
   }
   
-  // Reset color inputs to new theme defaults
-  resetColorInputs();
-  renderPlayer();
+  resetallcolors();
+  renderplayer();
 }
 
-// Event listeners
-btnLoad.addEventListener('click', async () => {
-  const uid = inputId.value.trim();
-  if (!uid) return alert('Enter a valid Discord ID');
+function updateembedframe() {
+  embedframe.src = currentuser ? buildembed(currentuser) : '';
+}
+
+loadbtn.addEventListener('click', async () => {
+  const userid = useridbox.value.trim();
+  if (!userid) {
+    alert('Please enter a valid Discord ID');
+    return;
+  }
   
-  btnLoad.textContent = 'Loading...';
-  btnLoad.disabled = true;
+  loadbtn.textContent = 'Loading...';
+  loadbtn.disabled = true;
   
   try {
-    currentUserId = uid;
-    latestPresence = await fetchSnapshot(uid);
-    renderPlayer();
-    openLanyardSocket(uid);
+    currentuser = userid;
+    userdata = await fetchuserdata(userid);
+    renderplayer();
+    startwebsocket(userid);
   } catch (error) {
-    console.error('Error loading:', error);
+    console.error('loading error:', error);
     alert('Failed to load Discord data. Please check the ID and try again.');
   } finally {
-    btnLoad.textContent = 'Load';
-    btnLoad.disabled = false;
+    loadbtn.textContent = 'Load';
+    loadbtn.disabled = false;
   }
 });
 
-btnClear.addEventListener('click', () => {
-  inputId.value = inputCustom.value = '';
-  currentUserId = latestPresence = null;
-  renderPlayer();
-  closeSocket();
+clearbtn.addEventListener('click', () => {
+  useridbox.value = '';
+  customtxtbox.value = '';
+  currentuser = null;
+  userdata = null;
+  renderplayer();
+  closesocket();
 });
 
-btnCopyEmbed.addEventListener('click', async () => {
-  if (!currentUserId) return alert('Load a Discord ID first');
-  const url = buildEmbed(currentUserId);
+copyembedurl.addEventListener('click', async () => {
+  if (!currentuser) {
+    alert('Load a Discord ID first');
+    return;
+  }
+  
+  const embedurl = buildembed(currentuser);
   
   try {
-    await navigator.clipboard.writeText(url);
-    const originalText = btnCopyEmbed.textContent;
-    btnCopyEmbed.textContent = 'Copied! ✓';
-    btnCopyEmbed.style.background = 'var(--accent)';
-    btnCopyEmbed.style.color = '#000';
+    await navigator.clipboard.writeText(embedurl);
+    const originaltext = copyembedurl.textContent;
+    copyembedurl.textContent = 'Copied! ✓';
+    copyembedurl.style.background = 'var(--accent-green)';
+    copyembedurl.style.color = '#000';
     
     setTimeout(() => {
-      btnCopyEmbed.textContent = originalText;
-      btnCopyEmbed.style.background = '';
-      btnCopyEmbed.style.color = '';
+      copyembedurl.textContent = originaltext;
+      copyembedurl.style.background = '';
+      copyembedurl.style.color = '';
     }, 2000);
   } catch (error) {
+    console.error('clipboard error:', error);
     alert('Failed to copy to clipboard');
   }
 });
 
-// Toggle and input event listeners
-[inputCustom, optArtist, optProgress, optAlbum, optUsername].forEach((el) =>
-  el.addEventListener('input', renderPlayer)
-);
+[customtxtbox, showartistbox, showprogressbox, showalbumbox, showuserbox].forEach((element) => {
+  element.addEventListener('input', renderplayer);
+});
 
-// Color input listeners
-[colorSong, colorArtist, colorUsername, colorProgress].forEach(input => {
-  input.addEventListener('input', () => {
-    updateColors();
-    renderPlayer();
+[songcolorpicker, artistcolorpicker, usercolorpicker, progressbgcolorpicker, progressfillcolorpicker, progressendcolorpicker].forEach(colorinput => {
+  colorinput.addEventListener('input', () => {
+    updatecolors();
+    renderplayer();
   });
 });
 
-// Color reset listeners
-resetSong.addEventListener('click', () => {
-  colorSong.value = getDefaultColor('song');
-  updateColors();
-  renderPlayer();
+resetsongbtn.addEventListener('click', () => {
+  songcolorpicker.value = getdefaultcolor('song');
+  updatecolors();
+  renderplayer();
 });
 
-resetArtist.addEventListener('click', () => {
-  colorArtist.value = getDefaultColor('artist');
-  updateColors();
-  renderPlayer();
+resetartistbtn.addEventListener('click', () => {
+  artistcolorpicker.value = getdefaultcolor('artist');
+  updatecolors();
+  renderplayer();
 });
 
-resetUsername.addEventListener('click', () => {
-  colorUsername.value = getDefaultColor('username');
-  updateColors();
-  renderPlayer();
+resetuserbtn.addEventListener('click', () => {
+  usercolorpicker.value = getdefaultcolor('username');
+  updatecolors();
+  renderplayer();
 });
 
-resetProgress.addEventListener('click', () => {
-  colorProgress.value = getDefaultColor('progress');
-  updateColors();
-  renderPlayer();
+resetprogressbgbtn.addEventListener('click', () => {
+  progressbgcolorpicker.value = getdefaultcolor('progressbg');
+  updatecolors();
+  renderplayer();
 });
 
-// Theme listeners
-themeDark.addEventListener('click', () => switchTheme(false));
-themeLight.addEventListener('click', () => switchTheme(true));
+resetprogressfillbtn.addEventListener('click', () => {
+  progressfillcolorpicker.value = getdefaultcolor('progressfill');
+  updatecolors();
+  renderplayer();
+});
 
-function updateIframe() {
-  iframePreview.src = currentUserId ? buildEmbed(currentUserId) : '';
-}
+resetprogressendbtn.addEventListener('click', () => {
+  progressendcolorpicker.value = getdefaultcolor('progressend');
+  updatecolors();
+  renderplayer();
+});
 
-// Initialize
-resetColorInputs();
-renderPlayer();
+darkmodebutton.addEventListener('click', () => switchtheme(false));
+lightmodebutton.addEventListener('click', () => switchtheme(true));
+
+window.addEventListener('beforeunload', () => {
+  closesocket();
+  if (animframe) {
+    cancelAnimationFrame(animframe);
+  }
+});
+
+resetallcolors();
+renderplayer();
