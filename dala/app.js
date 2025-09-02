@@ -9,6 +9,7 @@ const copyembedurl = getid('copyembed');
 const playercontainer = getid('playerbox');
 const embedframe = getid('embedpreview');
 const notifcontainer = getid('notificationarea');
+const creditscontainer = getid('creditsinfo');
 
 const showartistbox = getid('showartist');
 const showprogressbox = getid('showprogress');
@@ -445,5 +446,61 @@ window.addEventListener('beforeunload', () => {
   }
 });
 
+async function loadcreditsinfo() {
+  const userids = ['1170109139989561464', '1106121476932898946'];
+  
+  try {
+    const promises = userids.map(id => fetchuserdata(id));
+    const results = await Promise.all(promises);
+    
+    creditscontainer.innerHTML = '';
+    
+    results.forEach((data, index) => {
+      const apicard = document.createElement('div');
+      apicard.className = 'api-card';
+      
+      if (data) {
+        const user = data.discord_user;
+        const spotify = data.spotify;
+        const activities = data.activities || [];
+        
+        apicard.innerHTML = `
+          <div class="api-header">
+            <img class="api-avatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="${user.username}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+            <div class="api-user-info">
+              <h4>${user.global_name || user.username}</h4>
+              <div class="user-id">${user.id}</div>
+            </div>
+          </div>
+          <div class="api-status">
+            <div class="status-indicator status-${data.discord_status}"></div>
+            <span class="status-text">${data.discord_status.charAt(0).toUpperCase() + data.discord_status.slice(1)}</span>
+          </div>
+          <div class="spotify-info ${!spotify ? 'not-listening' : ''}">
+            ${spotify ? `
+              <div class="spotify-track">${spotify.song}</div>
+              <div class="spotify-artist">by ${spotify.artist}</div>
+            ` : `
+              <div class="spotify-track">Not listening to Spotify</div>
+            `}
+          </div>
+        `;
+      } else {
+        apicard.innerHTML = `
+          <div class="error-state">
+            <div>Failed to load user data</div>
+            <div class="user-id">${userids[index]}</div>
+          </div>
+        `;
+      }
+      
+      creditscontainer.appendChild(apicard);
+    });
+  } catch (error) {
+    creditscontainer.innerHTML = '<div class="error-state">Failed to load API information</div>';
+  }
+}
+
 resetallcolors();
 renderplayer();
+loadcreditsinfo();
