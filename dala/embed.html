@@ -95,60 +95,66 @@
         };
       }
 
-      function drawplayer() {
-        if (frameanimation) cancelAnimationFrame(frameanimation);
-        if (!presencedata) {
-          rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">No data</div><div class="artist">Loading...</div></div></div>';
-          return;
-        }
+      let playercard = null;
+      let albumart = null;
+      let tracktitle = null;
+      let trackartist = null;
+      let username = null;
+      let custommsg = null;
+      let currenttime = null;
+      let totaltime = null;
+      let progressfill = null;
+      let lastspotifydata = null;
 
-        const spotifyinfo = presencedata.spotify ?? null;
-        const discorduser = presencedata.discord_user?.username ?? null;
+      function createplayer() {
+        if (playercard) return;
+        
         rootcontainer.innerHTML = '';
-        const playercard = document.createElement('div');
+        playercard = document.createElement('div');
         playercard.className = 'player';
         
-        if (showalbum && spotifyinfo?.album_art_url) {
-          const albumart = document.createElement('img');
+        if (showalbum) {
+          albumart = document.createElement('img');
           albumart.className = 'art';
-          albumart.src = spotifyinfo.album_art_url;
+          albumart.style.display = 'none';
           albumart.onerror = () => albumart.style.display = 'none';
           playercard.appendChild(albumart);
         }
         
         const trackinfo = document.createElement('div');
         trackinfo.className = 'meta';
-        const tracktitle = document.createElement('div');
+        
+        tracktitle = document.createElement('div');
         tracktitle.className = 'song';
-        tracktitle.textContent = spotifyinfo?.song ?? '— Not listening';
+        tracktitle.textContent = '— Not listening';
         trackinfo.appendChild(tracktitle);
         
-        if (showartist && spotifyinfo?.artist) {
-          const trackartist = document.createElement('div');
+        if (showartist) {
+          trackartist = document.createElement('div');
           trackartist.className = 'artist';
-          trackartist.textContent = spotifyinfo.artist;
+          trackartist.style.display = 'none';
           trackinfo.appendChild(trackartist);
         }
         
-        if (showusername && discorduser) {
-          const username = document.createElement('div');
+        if (showusername) {
+          username = document.createElement('div');
           username.className = 'username';
-          username.textContent = `@${discorduser}`;
+          username.style.display = 'none';
           trackinfo.appendChild(username);
         }
         
         if (customtxt) {
-          const custommsg = document.createElement('div');
+          custommsg = document.createElement('div');
           custommsg.className = 'custom-text';
           custommsg.textContent = customtxt;
           trackinfo.appendChild(custommsg);
         }
         
-        if (showprogress && spotifyinfo) {
+        if (showprogress) {
           const timedisplay = document.createElement('div');
           timedisplay.className = 'time-row';
-          const currenttime = document.createElement('span');
-          const totaltime = document.createElement('span');
+          currenttime = document.createElement('span');
+          totaltime = document.createElement('span');
           currenttime.textContent = '--:--';
           totaltime.textContent = '--:--';
           timedisplay.appendChild(currenttime);
@@ -156,30 +162,81 @@
           
           const progressbar = document.createElement('div');
           progressbar.className = 'progress-bar';
-          const progressfill = document.createElement('div');
+          progressfill = document.createElement('div');
           progressfill.className = 'progress-fill';
           progressbar.appendChild(progressfill);
           trackinfo.appendChild(timedisplay);
           trackinfo.appendChild(progressbar);
-
-          function updateprogress() {
-            const progress = getprogress(spotifyinfo);
-            if (progress && spotifyinfo.timestamps) {
-              currenttime.textContent = formatduration(progress.elapsed);
-              totaltime.textContent = formatduration(progress.duration);
-              progressfill.style.transform = `scaleX(${progress.percent})`;
-            } else {
-              currenttime.textContent = '--:--';
-              totaltime.textContent = '--:--';
-              progressfill.style.transform = 'scaleX(0)';
-            }
-            frameanimation = requestAnimationFrame(updateprogress);
-          }
-          updateprogress();
         }
 
         playercard.appendChild(trackinfo);
         rootcontainer.appendChild(playercard);
+      }
+
+      function updateplayer() {
+        if (!playercard) createplayer();
+        if (!presencedata) return;
+
+        const spotifyinfo = presencedata.spotify ?? null;
+        const discorduser = presencedata.discord_user?.username ?? null;
+        
+        if (tracktitle) {
+          tracktitle.textContent = spotifyinfo?.song ?? '— Not listening';
+        }
+        
+        if (trackartist && showartist) {
+          if (spotifyinfo?.artist) {
+            trackartist.textContent = spotifyinfo.artist;
+            trackartist.style.display = 'block';
+          } else {
+            trackartist.style.display = 'none';
+          }
+        }
+        
+        if (albumart && showalbum) {
+          if (spotifyinfo?.album_art_url) {
+            albumart.src = spotifyinfo.album_art_url;
+            albumart.style.display = 'block';
+          } else {
+            albumart.style.display = 'none';
+          }
+        }
+        
+        if (username && showusername) {
+          if (discorduser) {
+            username.textContent = `@${discorduser}`;
+            username.style.display = 'block';
+          } else {
+            username.style.display = 'none';
+          }
+        }
+        
+        lastspotifydata = spotifyinfo;
+      }
+
+      function updateprogress() {
+        if (!showprogress || !lastspotifydata || !currenttime || !totaltime || !progressfill) {
+          if (frameanimation) frameanimation = requestAnimationFrame(updateprogress);
+          return;
+        }
+        
+        const progress = getprogress(lastspotifydata);
+        if (progress && lastspotifydata.timestamps) {
+          currenttime.textContent = formatduration(progress.elapsed);
+          totaltime.textContent = formatduration(progress.duration);
+          progressfill.style.transform = `scaleX(${progress.percent})`;
+        } else {
+          currenttime.textContent = '--:--';
+          totaltime.textContent = '--:--';
+          progressfill.style.transform = 'scaleX(0)';
+        }
+        frameanimation = requestAnimationFrame(updateprogress);
+      }
+
+      function drawplayer() {
+        updateplayer();
+        if (frameanimation) cancelAnimationFrame(frameanimation);
+        frameanimation = requestAnimationFrame(updateprogress);
       }
 
       async function fetchdata() {
@@ -190,11 +247,15 @@
             presencedata = jsondata.data;
             drawplayer();
           } else {
-            rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">User not found</div><div class="artist">Check Discord ID</div></div></div>';
+            if (!playercard) {
+              rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">User not found</div><div class="artist">Check Discord ID</div></div></div>';
+            }
           }
         } catch (error) {
           console.warn('fetch failed:', error);
-          rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">Connection error</div><div class="artist">Retrying...</div></div></div>';
+          if (!playercard) {
+            rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">Connection error</div><div class="artist">Retrying...</div></div></div>';
+          }
         }
       }
 
@@ -209,8 +270,8 @@
           refreshinterval = null;
         }
       }
-      startrefreshloop();
 
+      startrefreshloop();
       window.addEventListener('beforeunload', () => {
         stoprefreshloop();
         if (frameanimation) cancelAnimationFrame(frameanimation);
