@@ -1,6 +1,5 @@
 const getid = (id) => document.getElementById(id);
 const findel = (sel) => document.querySelector(sel);
-
 const useridbox = getid('userid');
 const customtxtbox = getid('customtxt');
 const loadbtn = getid('loadbtn');
@@ -9,21 +8,18 @@ const copyembedurl = getid('copyembed');
 const embedframe = getid('embedpreview');
 const notifcontainer = getid('notificationarea');
 const creditscontainer = getid('creditsinfo');
-
 const showartistbox = getid('showartist');
 const showprogressbox = getid('showprogress');
 const showalbumbox = getid('showalbum');
 const showuserbox = getid('showuser');
 const darkmodebutton = getid('darkmode');
 const lightmodebutton = getid('lightmode');
-
 const songcolorpicker = getid('songcolor');
 const artistcolorpicker = getid('artistcolor');
 const usercolorpicker = getid('usercolor');
 const progressbgcolorpicker = getid('progressbg');
 const progressfillcolorpicker = getid('progressfill');
 const progressendcolorpicker = getid('progressend');
-
 const resetsongbtn = getid('resetsong');
 const resetartistbtn = getid('resetartist');
 const resetuserbtn = getid('resetuser');
@@ -71,11 +67,9 @@ function shownotif(message, type = 'info') {
   
   const text = document.createElement('span');
   text.textContent = message;
-  
   notif.appendChild(icon);
   notif.appendChild(text);
   notifcontainer.appendChild(notif);
-  
   setTimeout(() => notif.classList.add('show'), 100);
   
   setTimeout(() => {
@@ -144,7 +138,6 @@ async function fetchuserdata(userid) {
 function startwebsocket(userid) {
   closesocket();
   websocket = new WebSocket('wss://api.lanyard.rest/socket');
-  
   websocket.addEventListener('message', (event) => {
     try {
       const message = JSON.parse(event.data);
@@ -221,7 +214,6 @@ function renderplayer() {
 
 function switchtheme(lightmode) {
   islighttheme = lightmode;
-  
   if (lightmode) {
     lightmodebutton.classList.add('btn-active');
     darkmodebutton.classList.remove('btn-active');
@@ -352,9 +344,7 @@ async function loadcreditsinfo() {
   try {
     const promises = userids.map(id => fetchuserdata(id));
     const results = await Promise.all(promises);
-    
     creditscontainer.innerHTML = '';
-    
     results.forEach((data, index) => {
       const apicard = document.createElement('div');
       apicard.className = 'api-card';
