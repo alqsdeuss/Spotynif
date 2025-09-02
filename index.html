@@ -3,119 +3,179 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Spotify Status Card — Lanyard (Enhanced)</title>
+  <title>Spotify Status Card — Modern Discord Tool</title>
   <link rel="stylesheet" href="dala/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="icon" href="dala/favicon.svg" />
   <meta name="description" content="Create beautiful, customizable Spotify status cards with live Discord integration via Lanyard API.">
 </head>
 <body>
-  <main class="wrap">
-    <header class="header">
+  <main class="main-wrap">
+    <header class="main-header">
       <h1>Spotify Status Card</h1>
-      <p class="muted">Live Discord card via Lanyard — clean, modern, mobile-friendly, embed-ready with custom colors.</p>
+      <p class="header-subtitle">Modern Discord tool — clean, responsive, embed-ready with custom colors</p>
     </header>
 
-    <section class="controls card">
-      <div class="field">
-        <span>Discord User ID</span>
-        <input id="inputId" placeholder="e.g. 123456789012345678" inputmode="numeric" />
+    <section class="control-panel glass-card">
+      <div class="input-section">
+        <label class="input-label">
+          <i class="fab fa-discord"></i>
+          Discord User ID
+        </label>
+        <input id="userid" placeholder="e.g. 123456789012345678" class="modern-input" inputmode="numeric" />
       </div>
       
-      <div class="buttons">
-        <button id="btnLoad" class="btn primary">Load</button>
-        <button id="btnClear" class="btn">Clear</button>
-        <button id="btnCopyEmbed" class="btn" title="Copy embed URL">Copy Embed URL</button>
+      <div class="button-row">
+        <button id="loadbtn" class="modern-btn btn-primary">
+          <i class="fas fa-play"></i>
+          Load
+        </button>
+        <button id="clearbtn" class="modern-btn btn-secondary">
+          <i class="fas fa-trash"></i>
+          Clear
+        </button>
+        <button id="copyembed" class="modern-btn btn-secondary">
+          <i class="fas fa-copy"></i>
+          Copy Embed URL
+        </button>
       </div>
       
-      <div class="field">
-        <span>Custom Text (optional)</span>
-        <input id="inputCustom" placeholder="Your custom message here..." />
+      <div class="input-section">
+        <label class="input-label">
+          <i class="fas fa-comment"></i>
+          Custom Text (optional)
+        </label>
+        <input id="customtxt" placeholder="Your custom message here..." class="modern-input" />
       </div>
       
-      <div class="note">
-        <strong>Note:</strong> Spotify must be connected to Discord with Activity Status enabled.
+      <div class="info-notice">
+        <i class="fas fa-info-circle"></i>
+        <div>
+          <strong>Note:</strong> Spotify must be connected to Discord with Activity Status enabled.
+        </div>
       </div>
     </section>
 
-    <section class="preview card" id="previewWrap">
-      <div id="playerContainer"></div>
+    <section class="preview-panel glass-card">
+      <div id="playerbox"></div>
       
-      <div class="edit-row">
-        <div class="control-section">
-          <h3>Display Options</h3>
-          <div class="toggles">
-            <label class="switch">
-              <input id="optArtist" type="checkbox" checked />
+      <div class="customization-grid">
+        <div class="settings-group">
+          <h3 class="group-title">
+            <i class="fas fa-eye"></i>
+            Display Options
+          </h3>
+          <div class="toggle-list">
+            <label class="toggle-switch">
+              <input id="showartist" type="checkbox" checked />
               <span>Artist</span>
             </label>
-            <label class="switch">
-              <input id="optProgress" type="checkbox" checked />
+            <label class="toggle-switch">
+              <input id="showprogress" type="checkbox" checked />
               <span>Progress</span>
             </label>
-            <label class="switch">
-              <input id="optAlbum" type="checkbox" checked />
+            <label class="toggle-switch">
+              <input id="showalbum" type="checkbox" checked />
               <span>Album Art</span>
             </label>
-            <label class="switch">
-              <input id="optUsername" type="checkbox" checked />
+            <label class="toggle-switch">
+              <input id="showuser" type="checkbox" checked />
               <span>Username</span>
             </label>
           </div>
         </div>
 
-        <div class="control-section">
-          <h3>Custom Colors</h3>
-          <div class="color-controls">
-            <div class="color-field">
+        <div class="settings-group">
+          <h3 class="group-title">
+            <i class="fas fa-palette"></i>
+            Text Colors
+          </h3>
+          <div class="color-list">
+            <div class="color-item">
               <label>Song Title</label>
-              <div class="color-input-wrapper">
-                <input type="color" id="colorSong" value="#e8e8e8">
-                <button type="button" class="color-reset" id="resetSong">Reset</button>
+              <div class="color-picker-wrap">
+                <input type="color" id="songcolor" value="#ffffff">
+                <button type="button" class="color-reset-btn" id="resetsong">Reset</button>
               </div>
             </div>
-            <div class="color-field">
+            <div class="color-item">
               <label>Artist Name</label>
-              <div class="color-input-wrapper">
-                <input type="color" id="colorArtist" value="#888888">
-                <button type="button" class="color-reset" id="resetArtist">Reset</button>
+              <div class="color-picker-wrap">
+                <input type="color" id="artistcolor" value="#a6a6a6">
+                <button type="button" class="color-reset-btn" id="resetartist">Reset</button>
               </div>
             </div>
-            <div class="color-field">
+            <div class="color-item">
               <label>Username</label>
-              <div class="color-input-wrapper">
-                <input type="color" id="colorUsername" value="#888888">
-                <button type="button" class="color-reset" id="resetUsername">Reset</button>
-              </div>
-            </div>
-            <div class="color-field">
-              <label>Progress Bar</label>
-              <div class="color-input-wrapper">
-                <input type="color" id="colorProgress" value="#00d474">
-                <button type="button" class="color-reset" id="resetProgress">Reset</button>
+              <div class="color-picker-wrap">
+                <input type="color" id="usercolor" value="#a6a6a6">
+                <button type="button" class="color-reset-btn" id="resetuser">Reset</button>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="control-section">
-          <h3>Card Theme</h3>
-          <div class="theme">
-            <button id="themeDark" class="btn small active">Dark</button>
-            <button id="themeLight" class="btn small">Light</button>
+        <div class="settings-group">
+          <h3 class="group-title">
+            <i class="fas fa-chart-line"></i>
+            Progress Bar Colors
+          </h3>
+          <div class="color-list">
+            <div class="color-item">
+              <label>Background</label>
+              <div class="color-picker-wrap">
+                <input type="color" id="progressbg" value="#2a2a2a">
+                <button type="button" class="color-reset-btn" id="resetprogressbg">Reset</button>
+              </div>
+            </div>
+            <div class="color-item">
+              <label>Fill Start</label>
+              <div class="color-picker-wrap">
+                <input type="color" id="progressfill" value="#1DB954">
+                <button type="button" class="color-reset-btn" id="resetprogressfill">Reset</button>
+              </div>
+            </div>
+            <div class="color-item">
+              <label>Fill End</label>
+              <div class="color-picker-wrap">
+                <input type="color" id="progressend" value="#1ed760">
+                <button type="button" class="color-reset-btn" id="resetprogressend">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h3 class="group-title">
+            <i class="fas fa-adjust"></i>
+            Card Theme
+          </h3>
+          <div class="theme-buttons">
+            <button id="darkmode" class="modern-btn btn-secondary btn-active">
+              <i class="fas fa-moon"></i>
+              Dark
+            </button>
+            <button id="lightmode" class="modern-btn btn-secondary">
+              <i class="fas fa-sun"></i>
+              Light
+            </button>
           </div>
         </div>
       </div>
       
-      <div class="embed-preview">
-        <label>Embed Preview (iframe)</label>
-        <div class="iframe-sample">
-          <iframe id="iframePreview" src="" title="Embed preview"></iframe>
+      <div class="embed-section">
+        <label class="embed-label">
+          <i class="fas fa-code"></i>
+          Embed Preview (iframe)
+        </label>
+        <div class="embed-container">
+          <iframe id="embedpreview" src="" title="Embed preview"></iframe>
         </div>
       </div>
     </section>
 
-    <footer>
-      Clone & deploy — use a Discord ID. Built with ❤️ and a pinch of Lanyard magic.
+    <footer class="main-footer">
+      Modern tool for Discord Spotify status. Built with <i class="fas fa-heart"></i> and a touch of Lanyard magic.
     </footer>
   </main>
   
