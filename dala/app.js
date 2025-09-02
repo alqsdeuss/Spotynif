@@ -170,4 +170,263 @@ function resetallcolors() {
   artistcolorpicker.value = getdefaultcolor('artist');
   usercolorpicker.value = getdefaultcolor('username');
   customtextcolorpicker.value = getdefaultcolor('customtext');
-  progressbgcolorpicker.value
+  progressbgcolorpicker.value = getdefaultcolor('progressbg');
+  progressfillcolorpicker.value = getdefaultcolor('progressfill');
+  progressendcolorpicker.value = getdefaultcolor('progressend');
+  updatecolors();
+}
+
+async function fetchuserdata(userid) {
+  try {
+    const response = await fetch(`https://api.lanyard.rest/v1/users/${userid}`);
+    const data = await response.json();
+    if (data?.success && data.data) return data.data;
+  } catch (error) {
+    console.error('fetch error:', error);
+  }
+  return null;
+}
+
+function startrefreshloop(userid) {
+  stoprefreshloop();
+  refreshinterval = setInterval(async () => {
+    try {
+      const newdata = await fetchuserdata(userid);
+      if (newdata) {
+        userdata = newdata;
+        updateembedframe();
+      }
+    } catch (error) {
+      console.error('refresh error:', error);
+    }
+  }, 10000);
+}
+
+function stoprefreshloop() {
+  if (refreshinterval) {
+    clearInterval(refreshinterval);
+    refreshinterval = null;
+  }
+}
+
+function updateembedframe() {
+  const currenturl = embedframe.src;
+  const newurl = currentuser ? buildembed(currentuser) : '';
+  if (currenturl !== newurl) {
+    embedframe.src = newurl;
+  }
+}
+
+function switchtheme(lightmode) {
+  islighttheme = lightmode;
+  if (lightmode) {
+    lightmodebutton.classList.add('btnactive');
+    darkmodebutton.classList.remove('btnactive');
+  } else {
+    darkmodebutton.classList.add('btnactive');
+    lightmodebutton.classList.remove('btnactive');
+  }
+  
+  resetallcolors();
+  updateembedframe();
+}
+
+// Event listeners
+loadbtn.addEventListener('click', async () => {
+  const userid = useridbox.value.trim();
+  if (!userid) {
+    shownotif('please enter a valid discord id', 'error');
+    return;
+  }
+  
+  loadbtn.textContent = 'loading...';
+  loadbtn.disabled = true;
+  
+  try {
+    currentuser = userid;
+    userdata = await fetchuserdata(userid);
+    updateembedframe();
+    startrefreshloop(userid);
+    shownotif('discord data loaded successfully! updates every 10 seconds', 'success');
+  } catch (error) {
+    console.error('loading error:', error);
+    shownotif('failed to load discord data. check the id and try again.', 'error');
+  } finally {
+    loadbtn.textContent = 'load';
+    loadbtn.disabled = false;
+  }
+});
+
+clearbtn.addEventListener('click', () => {
+  useridbox.value = '';
+  customtxtbox.value = '';
+  currentuser = null;
+  userdata = null;
+  updateembedframe();
+  stoprefreshloop();
+  shownotif('cleared all data', 'success');
+});
+
+copyembedurl.addEventListener('click', async () => {
+  if (!currentuser) {
+    shownotif('load a discord id first', 'error');
+    return;
+  }
+  
+  const embedurl = buildembed(currentuser);
+  
+  try {
+    await navigator.clipboard.writeText(embedurl);
+    shownotif('embed url copied to clipboard!', 'success');
+  } catch (error) {
+    console.error('clipboard error:', error);
+    shownotif('failed to copy to clipboard', 'error');
+  }
+});
+
+// Add event listeners for all controls
+[customtxtbox, showartistbox, showprogressbox, showalbumbox, showuserbox, 
+ showdurationbox, showstatusbox].forEach((element) => {
+  element.addEventListener('input', updateembedframe);
+});
+
+[songcolorpicker, artistcolorpicker, usercolorpicker, customtextcolorpicker,
+ progressbgcolorpicker, progressfillcolorpicker, progressendcolorpicker].forEach(colorinput => {
+  colorinput.addEventListener('input', () => {
+    updatecolors();
+    updateembedframe();
+  });
+});
+
+[songtitleeffectsel, artisteffectsel, usernameeffectsel, customtexteffectsel,
+ cardentrancesel, cardhoversel, albumarteffectsel, progressstylesel].forEach(effectsel => {
+  effectsel.addEventListener('change', updateembedframe);
+});
+
+[progressheightslider, progressradiusslider].forEach(slider => {
+  slider.addEventListener('input', () => {
+    updatecolors();
+    updateembedframe();
+  });
+});
+
+// Reset button event listeners
+resetsongbtn.addEventListener('click', () => {
+  songcolorpicker.value = getdefaultcolor('song');
+  updatecolors();
+  updateembedframe();
+});
+
+resetartistbtn.addEventListener('click', () => {
+  artistcolorpicker.value = getdefaultcolor('artist');
+  updatecolors();
+  updateembedframe();
+});
+
+resetuserbtn.addEventListener('click', () => {
+  usercolorpicker.value = getdefaultcolor('username');
+  updatecolors();
+  updateembedframe();
+});
+
+resetcustomtextbtn.addEventListener('click', () => {
+  customtextcolorpicker.value = getdefaultcolor('customtext');
+  updatecolors();
+  updateembedframe();
+});
+
+resetprogressbgbtn.addEventListener('click', () => {
+  progressbgcolorpicker.value = getdefaultcolor('progressbg');
+  updatecolors();
+  updateembedframe();
+});
+
+resetprogressfillbtn.addEventListener('click', () => {
+  progressfillcolorpicker.value = getdefaultcolor('progressfill');
+  updatecolors();
+  updateembedframe();
+});
+
+resetprogressendbtn.addEventListener('click', () => {
+  progressendcolorpicker.value = getdefaultcolor('progressend');
+  updatecolors();
+  updateembedframe();
+});
+
+// Theme switchers
+darkmodebutton.addEventListener('click', () => switchtheme(false));
+lightmodebutton.addEventListener('click', () => switchtheme(true));
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+  stoprefreshloop();
+});
+
+// Credits section
+async function loadcreditsinfo() {
+  const userids = ['1170109139989561464', '1106121476932898946'];
+  
+  try {
+    const promises = userids.map(id => fetchuserdata(id));
+    const results = await Promise.all(promises);
+    creditscontainer.innerHTML = '';
+    
+    results.forEach((data, index) => {
+      const apicard = document.createElement('div');
+      apicard.className = 'apicard';
+      
+      if (data) {
+        const user = data.discord_user;
+        const spotify = data.spotify;
+        
+        apicard.innerHTML = `
+          <div class="apiheader">
+            <img class="apiavatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="${user.username}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+            <div class="apiuserinfo">
+              <h4>${user.global_name || user.username}</h4>
+              <div class="userid">${user.id}</div>
+            </div>
+          </div>
+          <div class="apistatus">
+            <div class="statusindicator status${data.discord_status}"></div>
+            <span class="statustext">${data.discord_status}</span>
+          </div>
+          <div class="spotifyinfo ${!spotify ? 'notlistening' : ''}">
+            ${spotify ? `
+              <div class="spotifytrack">${spotify.song}</div>
+              <div class="spotifyartist">by ${spotify.artist}</div>
+            ` : `
+              <div class="spotifytrack">not listening to spotify</div>
+            `}
+          </div>
+        `;
+      } else {
+        apicard.innerHTML = `
+          <div class="errorstate">
+            <div>failed to load user data</div>
+            <div class="userid">${userids[index]}</div>
+          </div>
+        `;
+      }
+      
+      creditscontainer.appendChild(apicard);
+    });
+  } catch (error) {
+    creditscontainer.innerHTML = '<div class="errorstate">failed to load api information</div>';
+  }
+}
+
+// Initialize app
+function initapp() {
+  resetallcolors();
+  updateembedframe();
+  loadcreditsinfo();
+  
+  // Set initial slider values
+  progressheightslider.value = 6;
+  progressradiusslider.value = 3;
+  updatecolors();
+}
+
+// Start the app
+initapp();
