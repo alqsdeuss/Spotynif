@@ -1,9 +1,8 @@
-// dala/app.js
 const qs = (s) => document.querySelector(s);
 const byId = (id) => document.getElementById(id);
 
 const inputId = byId('inputId');
-const customText = byId('customText');
+const inputCustom = byId('inputCustom');
 const btnLoad = byId('btnLoad');
 const btnClear = byId('btnClear');
 const btnCopyEmbed = byId('btnCopyEmbed');
@@ -25,12 +24,12 @@ let rafId = null;
 
 function buildEmbed(userId) {
   const params = new URLSearchParams({
-    showArtist: optArtist.checked,
-    showProgress: optProgress.checked,
-    showAlbum: optAlbum.checked,
-    showUsername: optUsername.checked,
-    customText: customText.value.trim(),
-    theme: document.body.classList.contains('light') ? 'light' : 'dark'
+    showArtist: String(optArtist.checked),
+    showProgress: String(optProgress.checked),
+    showAlbum: String(optAlbum.checked),
+    showUsername: String(optUsername.checked),
+    theme: document.body.classList.contains('light') ? 'light' : 'dark',
+    custom: inputCustom.value || ''
   });
   return `${location.origin}/dala/embed.html?id=${encodeURIComponent(userId)}&${params.toString()}`;
 }
@@ -44,20 +43,44 @@ async function fetchSnapshot(uid) {
   return null;
 }
 
-function computeProgress(spotify) {
-  if (!spotify?.timestamps) return null;
-  const { start, end } = spotify.timestamps;
-  if (!start || !end) return null;
-  const dur = end - start;
-  const elapsed = Date.now() - start;
-  const pct = Math.max(0, Math.min(1, elapsed / dur));
-  return { elapsed, dur, pct };
+function openLanyardSocket(uid) {
+  closeSocket();
+  ws = new WebSocket('wss://api.lanyard.rest/socket');
+  ws.addEventListener('message', (ev) => {
+    try {
+      const { op, d, t } = JSON.parse(ev.data);
+      if (op === 1 && d?.heartbeat_interval) {
+        ws.send(JSON.stringify({ op: 2, d: { subscribe_to_id: uid } }));
+        heartbeatIntervalId = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ op: 3 }));
+        }, d.heartbeat_interval);
+      } else if (op === 0) {
+        latestPresence = t === 'INIT_STATE' ? d[uid] ?? d : d;
+        renderPlayer();
+      }
+    } catch {}
+  });
+}
+
+function closeSocket() {
+  if (heartbeatIntervalId) clearInterval(heartbeatIntervalId);
+  if (ws) ws.close();
+  heartbeatIntervalId = null;
+  ws = null;
 }
 
 function fmt(ms) {
   if (!ms) return '0:00';
-  const s = Math.floor(ms / 1000), m = Math.floor(s / 60), ss = String(s % 60).padStart(2, '0');
-  return `${m}:${ss}`;
+  const s = Math.floor(ms / 1000);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+function computeProgress(spotify) {
+  if (!spotify?.timestamps) return null;
+  const { start, end } = spotify.timestamps;
+  const dur = end - start;
+  const elapsed = Date.now() - start;
+  return { elapsed, dur, pct: Math.min(1, Math.max(0, elapsed / dur)) };
 }
 
 function renderPlayer() {
@@ -71,7 +94,9 @@ function renderPlayer() {
   }
 
   const { spotify, discord_user } = latestPresence;
-  const username = discord_user?.username ?? null;
+  const username = discord_user?.username;
+  const customText = inputCustom.value.trim();
+
   const card = document.createElement('div');
   card.className = 'player';
 
@@ -79,12 +104,12 @@ function renderPlayer() {
     const img = document.createElement('img');
     img.className = 'art';
     img.src = spotify.album_art_url;
-    img.alt = 'Album art';
     card.appendChild(img);
   }
 
   const meta = document.createElement('div');
   meta.className = 'meta';
+
   const title = document.createElement('div');
   title.className = 'song';
   title.textContent = spotify?.song ?? '— Not listening';
@@ -104,17 +129,18 @@ function renderPlayer() {
     meta.appendChild(userEl);
   }
 
-  if (customText.value.trim()) {
-    const textEl = document.createElement('div');
-    textEl.className = 'custom-text';
-    textEl.textContent = customText.value.trim();
-    meta.appendChild(textEl);
+  if (customText) {
+    const customEl = document.createElement('div');
+    customEl.className = 'custom-text';
+    customEl.textContent = customText;
+    meta.appendChild(customEl);
   }
 
   if (optProgress.checked) {
     const timeRow = document.createElement('div');
     timeRow.className = 'time-row';
-    const left = document.createElement('span'), right = document.createElement('span');
+    const left = document.createElement('span');
+    const right = document.createElement('span');
     timeRow.append(left, right);
 
     const bar = document.createElement('div');
@@ -125,19 +151,18 @@ function renderPlayer() {
 
     meta.append(timeRow, bar);
 
-    const tick = () => {
+    function tick() {
       const progress = computeProgress(spotify);
       if (progress) {
         left.textContent = fmt(progress.elapsed);
         right.textContent = fmt(progress.dur);
         fill.style.transform = `scaleX(${progress.pct})`;
       } else {
-        left.textContent = '--:--';
-        right.textContent = '--:--';
+        left.textContent = right.textContent = '--:--';
         fill.style.transform = 'scaleX(0)';
       }
       rafId = requestAnimationFrame(tick);
-    };
+    }
     tick();
   }
 
@@ -146,70 +171,47 @@ function renderPlayer() {
   updateIframe();
 }
 
-function openSocket(uid) {
-  if (!uid) return;
-  if (ws) ws.close();
-
-  ws = new WebSocket('wss://api.lanyard.rest/socket');
-  ws.addEventListener('message', (e) => {
-    try {
-      const { op, d, t } = JSON.parse(e.data);
-      if (op === 1 && d?.heartbeat_interval) {
-        ws.send(JSON.stringify({ op: 2, d: { subscribe_to_id: uid } }));
-        clearInterval(heartbeatIntervalId);
-        heartbeatIntervalId = setInterval(() => {
-          if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ op: 3 }));
-        }, d.heartbeat_interval);
-      } else if (op === 0) {
-        latestPresence = t === 'INIT_STATE' ? (d[uid] ?? d) : d;
-        renderPlayer();
-      }
-    } catch {}
-  });
-  ws.addEventListener('close', () => clearInterval(heartbeatIntervalId));
-}
-
-btnLoad.onclick = async () => {
+btnLoad.addEventListener('click', async () => {
   const uid = inputId.value.trim();
   if (!uid) return alert('Enter a valid Discord ID');
   currentUserId = uid;
   latestPresence = await fetchSnapshot(uid);
   renderPlayer();
-  openSocket(uid);
-};
-
-btnClear.onclick = () => {
-  inputId.value = '';
-  currentUserId = null;
-  latestPresence = null;
-  renderPlayer();
-  if (ws) ws.close();
-};
-
-btnCopyEmbed.onclick = () => {
-  if (!currentUserId) return alert('Load a Discord ID first');
-  navigator.clipboard.writeText(buildEmbed(currentUserId)).then(() => {
-    btnCopyEmbed.textContent = 'Copied!';
-    setTimeout(() => btnCopyEmbed.textContent = 'Copy Embed URL', 1500);
-  });
-};
-
-[optArtist, optProgress, optAlbum, optUsername, customText].forEach(el => {
-  el.addEventListener('change', renderPlayer);
+  openLanyardSocket(uid);
 });
 
-themeDark.onclick = () => {
+btnClear.addEventListener('click', () => {
+  inputId.value = inputCustom.value = '';
+  currentUserId = latestPresence = null;
+  renderPlayer();
+  closeSocket();
+});
+
+btnCopyEmbed.addEventListener('click', () => {
+  if (!currentUserId) return alert('Load a Discord ID first');
+  const url = buildEmbed(currentUserId);
+  navigator.clipboard.writeText(url).then(() => {
+    btnCopyEmbed.textContent = 'Copied!';
+    setTimeout(() => (btnCopyEmbed.textContent = 'Copy Embed URL'), 1500);
+  });
+});
+
+[inputCustom, optArtist, optProgress, optAlbum, optUsername].forEach((el) =>
+  el.addEventListener('input', renderPlayer)
+);
+
+themeDark.addEventListener('click', () => {
   document.body.classList.remove('light');
   themeDark.classList.add('active');
   themeLight.classList.remove('active');
   renderPlayer();
-};
-themeLight.onclick = () => {
+});
+themeLight.addEventListener('click', () => {
   document.body.classList.add('light');
   themeLight.classList.add('active');
   themeDark.classList.remove('active');
   renderPlayer();
-};
+});
 
 function updateIframe() {
   iframePreview.src = currentUserId ? buildEmbed(currentUserId) : '';
