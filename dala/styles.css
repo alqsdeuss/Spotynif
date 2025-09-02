@@ -167,8 +167,6 @@ body::before {
 
 .glass-card:hover {
   border-color: var(--border-medium);
-  box-shadow: var(--shadow-strong);
-  transform: translateY(-4px);
 }
 
 .control-panel {
@@ -465,7 +463,6 @@ body::before {
 
 .settings-group:hover {
   border-color: var(--border-medium);
-  transform: translateY(-2px);
 }
 
 .group-title {
@@ -494,8 +491,8 @@ body::before {
 .toggle-switch {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px;
+  gap: 12px;
+  padding: 16px;
   background: var(--bg-tertiary);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -503,18 +500,48 @@ body::before {
   font-size: 14px;
   font-weight: 500;
   border: 1px solid var(--border-subtle);
+  position: relative;
+  user-select: none;
 }
 
 .toggle-switch:hover {
   background: var(--glass-overlay);
-  transform: translateX(2px);
 }
 
 .toggle-switch input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   accent-color: var(--text-primary);
   border-radius: 4px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-medium);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.toggle-switch input[type="checkbox"]:checked {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+.toggle-switch input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #000;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.toggle-switch input[type="checkbox"]:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 2px;
 }
 
 .color-list {
@@ -786,7 +813,26 @@ input[type="color"]::-webkit-color-swatch {
   }
 
   .toggle-list {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .toggle-switch {
+    padding: 20px 16px;
+    gap: 16px;
+    font-size: 16px;
+    min-height: 56px;
+  }
+  
+  .toggle-switch input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--border-medium);
+  }
+  
+  .toggle-switch input[type="checkbox"]:checked::after {
+    font-size: 14px;
+    font-weight: 900;
   }
 
   .color-list {
@@ -828,6 +874,26 @@ input[type="color"]::-webkit-color-swatch {
   
   .toggle-list {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .toggle-switch {
+    padding: 24px 20px;
+    gap: 20px;
+    font-size: 18px;
+    min-height: 64px;
+    border: 2px solid var(--border-subtle);
+  }
+  
+  .toggle-switch input[type="checkbox"] {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border-medium);
+  }
+  
+  .toggle-switch input[type="checkbox"]:checked::after {
+    font-size: 16px;
+    font-weight: 900;
   }
   
   .player {
