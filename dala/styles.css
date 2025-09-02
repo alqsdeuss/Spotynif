@@ -82,7 +82,7 @@
 html, body {
   height: 100%;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, var(--bg-main) 0%, var(--bg-secondary) 100%);
+  background: var(--bg-main);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -90,18 +90,7 @@ html, body {
 }
 
 body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.01) 0%, transparent 40%);
-  pointer-events: none;
-  z-index: -1;
+  display: none;
 }
 
 .main-wrap {
@@ -141,25 +130,18 @@ body::before {
 }
 
 .glass-card {
-  background: linear-gradient(135deg, var(--glass-overlay), rgba(255, 255, 255, 0.01));
+  background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
-  backdrop-filter: blur(24px);
+  backdrop-filter: none;
   padding: 32px;
   box-shadow: var(--shadow-medium);
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
-  overflow: hidden;
 }
 
 .glass-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  display: none;
 }
 
 .glass-card:hover {
@@ -260,16 +242,16 @@ body::before {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+  background: var(--text-primary);
   color: #000;
   font-weight: 700;
-  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--text-secondary), var(--text-primary));
+  background: var(--text-secondary);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
 }
 
 .btn-secondary {
@@ -491,16 +473,17 @@ body::before {
   align-items: center;
   gap: 10px;
   padding: 12px;
-  background: var(--glass-overlay);
+  background: var(--bg-tertiary);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 14px;
   font-weight: 500;
+  border: 1px solid var(--border-subtle);
 }
 
 .toggle-switch:hover {
-  background: var(--glass-hover);
+  background: var(--glass-overlay);
   transform: translateX(2px);
 }
 
