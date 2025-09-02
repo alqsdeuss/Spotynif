@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Embed Card — Spotynif Tool</title>
+  <title>spotynif embed</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="favicon.svg" />
-  <meta name="description" content="Spotify Card by Spotynif Tool">
+  <meta name="description" content="enhanced spotify card by spotynif">
   <style>
     html, body, #embedroot {
       height: 100%;
@@ -20,6 +20,7 @@
       justify-content: center;
       padding: 8px;
       background: transparent;
+      font-family: 'NotoSansMono', 'Noto Sans Mono', monospace;
     }
     
     #embedroot {
@@ -39,39 +40,68 @@
       const showprogress = urlparams.get('showProgress') !== 'false';
       const showalbum = urlparams.get('showAlbum') !== 'false';
       const showusername = urlparams.get('showUsername') !== 'false';
+      const showduration = urlparams.get('showDuration') !== 'false';
+      const showstatus = urlparams.get('showStatus') === 'true';
       const cardtheme = urlparams.get('theme') === 'light' ? 'light' : 'dark';
       const customtxt = urlparams.get('custom') || '';
+      
+      // Colors
       const customsongcolor = urlparams.get('songColor') || '';
       const customartistcolor = urlparams.get('artistColor') || '';
       const customusernamecolor = urlparams.get('usernameColor') || '';
+      const customtextcolor = urlparams.get('customTextColor') || '';
       const customprogressbgcolor = urlparams.get('progressBgColor') || '';
       const customprogressfillcolor = urlparams.get('progressFillColor') || '';
       const customprogressendcolor = urlparams.get('progressEndColor') || '';
+      
+      // Effects
+      const songeffect = urlparams.get('songEffect') || 'none';
+      const artisteffect = urlparams.get('artistEffect') || 'none';
+      const usernameeffect = urlparams.get('usernameEffect') || 'none';
+      const customtexteffect = urlparams.get('customTextEffect') || 'none';
+      const cardentrance = urlparams.get('cardEntrance') || 'none';
+      const cardhover = urlparams.get('cardHover') || 'none';
+      const albumarteffect = urlparams.get('albumArtEffect') || 'none';
+      const progressstyle = urlparams.get('progressStyle') || 'default';
+      const progressheight = urlparams.get('progressHeight') || '6';
+      const progressradius = urlparams.get('progressRadius') || '3';
 
+      // Apply theme
       if (cardtheme === 'light') {
-        document.body.classList.add('card-light');
+        document.body.classList.add('cardlight');
       }
 
+      // Apply custom CSS variables
       const documentroot = document.documentElement;
       if (customsongcolor) documentroot.style.setProperty('--song-color', customsongcolor);
       if (customartistcolor) documentroot.style.setProperty('--artist-color', customartistcolor);
       if (customusernamecolor) documentroot.style.setProperty('--username-color', customusernamecolor);
+      if (customtextcolor) documentroot.style.setProperty('--customtext-color', customtextcolor);
       if (customprogressbgcolor) documentroot.style.setProperty('--progress-bg-color', customprogressbgcolor);
       if (customprogressfillcolor) documentroot.style.setProperty('--progress-fill-color', customprogressfillcolor);
       if (customprogressendcolor) documentroot.style.setProperty('--progress-fill-end-color', customprogressendcolor);
+      documentroot.style.setProperty('--progress-height', progressheight + 'px');
+      documentroot.style.setProperty('--progress-radius', progressradius + 'px');
+      
       const rootcontainer = document.getElementById('embedroot');
 
       if (!discordid) {
-        rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">Missing ID</div><div class="artist">Please provide a Discord user ID</div></div></div>';
+        rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">missing id</div><div class="artist">please provide a discord user id</div></div></div>';
         return;
       }
 
+      // Utility functions
       const formatduration = ms => {
         if (!ms) return '0:00';
         const seconds = Math.floor(ms / 1000);
         const minutes = Math.floor(seconds / 60);
         const remainingsecs = String(seconds % 60).padStart(2, '0');
         return `${minutes}:${remainingsecs}`;
+      };
+
+      const applyeffect = (element, effect) => {
+        if (!element || effect === 'none') return;
+        element.classList.add(effect);
       };
 
       let presencedata = null;
@@ -101,8 +131,10 @@
       let trackartist = null;
       let username = null;
       let custommsg = null;
+      let statusdot = null;
       let currenttime = null;
       let totaltime = null;
+      let progressbar = null;
       let progressfill = null;
       let lastspotifydata = null;
 
@@ -113,46 +145,75 @@
         playercard = document.createElement('div');
         playercard.className = 'player';
         
+        // Apply card effects
+        if (cardentrance !== 'none') {
+          playercard.classList.add(cardentrance);
+        }
+        if (cardhover !== 'none') {
+          playercard.classList.add('hover' + cardhover);
+        }
+        
+        // Album art
         if (showalbum) {
           albumart = document.createElement('img');
           albumart.className = 'art';
           albumart.style.display = 'none';
           albumart.onerror = () => albumart.style.display = 'none';
+          if (albumarteffect !== 'none') {
+            albumart.classList.add('art' + albumarteffect);
+          }
           playercard.appendChild(albumart);
         }
         
+        // Track info container
         const trackinfo = document.createElement('div');
         trackinfo.className = 'meta';
         
+        // Status indicator
+        if (showstatus) {
+          statusdot = document.createElement('div');
+          statusdot.className = 'statusindicator statusoffline';
+          trackinfo.appendChild(statusdot);
+        }
+        
+        // Song title
         tracktitle = document.createElement('div');
         tracktitle.className = 'song';
-        tracktitle.textContent = '— Not listening';
+        tracktitle.textContent = '— not listening';
+        applyeffect(tracktitle, songeffect);
         trackinfo.appendChild(tracktitle);
         
+        // Artist
         if (showartist) {
           trackartist = document.createElement('div');
           trackartist.className = 'artist';
           trackartist.style.display = 'none';
+          applyeffect(trackartist, artisteffect);
           trackinfo.appendChild(trackartist);
         }
         
+        // Username
         if (showusername) {
           username = document.createElement('div');
           username.className = 'username';
           username.style.display = 'none';
+          applyeffect(username, usernameeffect);
           trackinfo.appendChild(username);
         }
         
+        // Custom text
         if (customtxt) {
           custommsg = document.createElement('div');
-          custommsg.className = 'custom-text';
+          custommsg.className = 'customtext';
           custommsg.textContent = customtxt;
+          applyeffect(custommsg, customtexteffect);
           trackinfo.appendChild(custommsg);
         }
         
-        if (showprogress) {
+        // Progress and time
+        if (showprogress && showduration) {
           const timedisplay = document.createElement('div');
-          timedisplay.className = 'time-row';
+          timedisplay.className = 'timerow';
           currenttime = document.createElement('span');
           totaltime = document.createElement('span');
           currenttime.textContent = '--:--';
@@ -160,12 +221,26 @@
           timedisplay.appendChild(currenttime);
           timedisplay.appendChild(totaltime);
           
-          const progressbar = document.createElement('div');
-          progressbar.className = 'progress-bar';
+          progressbar = document.createElement('div');
+          progressbar.className = 'progressbar';
+          if (progressstyle !== 'default') {
+            progressbar.classList.add('progress' + progressstyle);
+          }
           progressfill = document.createElement('div');
-          progressfill.className = 'progress-fill';
+          progressfill.className = 'progressfill';
           progressbar.appendChild(progressfill);
+          
           trackinfo.appendChild(timedisplay);
+          trackinfo.appendChild(progressbar);
+        } else if (showprogress) {
+          progressbar = document.createElement('div');
+          progressbar.className = 'progressbar';
+          if (progressstyle !== 'default') {
+            progressbar.classList.add('progress' + progressstyle);
+          }
+          progressfill = document.createElement('div');
+          progressfill.className = 'progressfill';
+          progressbar.appendChild(progressfill);
           trackinfo.appendChild(progressbar);
         }
 
@@ -179,20 +254,34 @@
 
         const spotifyinfo = presencedata.spotify ?? null;
         const discorduser = presencedata.discord_user?.username ?? null;
+        const discordstatus = presencedata.discord_status || 'offline';
         
+        // Update song title
         if (tracktitle) {
-          tracktitle.textContent = spotifyinfo?.song ?? '— Not listening';
+          const songtitle = spotifyinfo?.song ?? '— not listening';
+          if (songeffect === 'typing') {
+            animatetyping(tracktitle, songtitle);
+          } else {
+            tracktitle.textContent = songtitle;
+          }
         }
         
+        // Update artist
         if (trackartist && showartist) {
           if (spotifyinfo?.artist) {
-            trackartist.textContent = spotifyinfo.artist;
+            const artistname = spotifyinfo.artist;
+            if (artisteffect === 'typing') {
+              animatetyping(trackartist, artistname);
+            } else {
+              trackartist.textContent = artistname;
+            }
             trackartist.style.display = 'block';
           } else {
             trackartist.style.display = 'none';
           }
         }
         
+        // Update album art
         if (albumart && showalbum) {
           if (spotifyinfo?.album_art_url) {
             albumart.src = spotifyinfo.album_art_url;
@@ -202,32 +291,63 @@
           }
         }
         
+        // Update username
         if (username && showusername) {
           if (discorduser) {
-            username.textContent = `@${discorduser}`;
+            const displayname = `@${discorduser}`;
+            if (usernameeffect === 'typing') {
+              animatetyping(username, displayname);
+            } else {
+              username.textContent = displayname;
+            }
             username.style.display = 'block';
           } else {
             username.style.display = 'none';
           }
         }
         
+        // Update status
+        if (statusdot && showstatus) {
+          statusdot.className = `statusindicator status${discordstatus}`;
+        }
+        
         lastspotifydata = spotifyinfo;
       }
 
+      function animatetyping(element, text) {
+        element.style.width = '0';
+        element.style.overflow = 'hidden';
+        element.style.whiteSpace = 'nowrap';
+        element.textContent = '';
+        
+        let i = 0;
+        const typeinterval = setInterval(() => {
+          if (i < text.length) {
+            element.textContent += text.charAt(i);
+            i++;
+          } else {
+            clearInterval(typeinterval);
+            element.style.width = 'auto';
+            element.style.overflow = 'visible';
+            element.style.whiteSpace = 'nowrap';
+          }
+        }, 50);
+      }
+
       function updateprogress() {
-        if (!showprogress || !lastspotifydata || !currenttime || !totaltime || !progressfill) {
+        if (!showprogress || !lastspotifydata || !progressfill) {
           if (frameanimation) frameanimation = requestAnimationFrame(updateprogress);
           return;
         }
         
         const progress = getprogress(lastspotifydata);
         if (progress && lastspotifydata.timestamps) {
-          currenttime.textContent = formatduration(progress.elapsed);
-          totaltime.textContent = formatduration(progress.duration);
+          if (currenttime) currenttime.textContent = formatduration(progress.elapsed);
+          if (totaltime) totaltime.textContent = formatduration(progress.duration);
           progressfill.style.transform = `scaleX(${progress.percent})`;
         } else {
-          currenttime.textContent = '--:--';
-          totaltime.textContent = '--:--';
+          if (currenttime) currenttime.textContent = '--:--';
+          if (totaltime) totaltime.textContent = '--:--';
           progressfill.style.transform = 'scaleX(0)';
         }
         frameanimation = requestAnimationFrame(updateprogress);
@@ -248,13 +368,13 @@
             drawplayer();
           } else {
             if (!playercard) {
-              rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">User not found</div><div class="artist">Check Discord ID</div></div></div>';
+              rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">user not found</div><div class="artist">check discord id</div></div></div>';
             }
           }
         } catch (error) {
           console.warn('fetch failed:', error);
           if (!playercard) {
-            rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">Connection error</div><div class="artist">Retrying...</div></div></div>';
+            rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">connection error</div><div class="artist">retrying...</div></div></div>';
           }
         }
       }
@@ -271,6 +391,7 @@
         }
       }
 
+      // Initialize
       startrefreshloop();
       window.addEventListener('beforeunload', () => {
         stoprefreshloop();
