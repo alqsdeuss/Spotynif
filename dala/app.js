@@ -137,7 +137,7 @@ async function fetchuserdata(userid) {
 
 function startwebsocket(userid) {
   closesocket();
-  websocket = new WebSocket('wss://api.lanyard.rest/socket');
+  websocket = new WebSocket('https://lanyard.cnrad.dev/');
   websocket.addEventListener('message', (event) => {
     try {
       const message = JSON.parse(event.data);
