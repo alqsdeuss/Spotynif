@@ -16,11 +16,33 @@ const optUsername = byId('optUsername');
 const themeDark = byId('themeDark');
 const themeLight = byId('themeLight');
 
+// Color controls
+const colorSong = byId('colorSong');
+const colorArtist = byId('colorArtist');
+const colorUsername = byId('colorUsername');
+const resetSong = byId('resetSong');
+const resetArtist = byId('resetArtist');
+const resetUsername = byId('resetUsername');
+
 let currentUserId = null;
 let ws = null;
 let heartbeatIntervalId = null;
 let latestPresence = null;
 let rafId = null;
+let isCardLightTheme = false;
+
+// Default colors
+const defaultColors = {
+  song: '#ffffff',
+  artist: '#a6a6a6',
+  username: '#a6a6a6'
+};
+
+const defaultColorsLight = {
+  song: '#0b0b0b',
+  artist: '#666666',
+  username: '#666666'
+};
 
 function buildEmbed(userId) {
   const params = new URLSearchParams({
@@ -28,10 +50,31 @@ function buildEmbed(userId) {
     showProgress: String(optProgress.checked),
     showAlbum: String(optAlbum.checked),
     showUsername: String(optUsername.checked),
-    theme: document.body.classList.contains('light') ? 'light' : 'dark',
-    custom: inputCustom.value || ''
+    theme: isCardLightTheme ? 'light' : 'dark',
+    custom: inputCustom.value || '',
+    songColor: colorSong.value !== getDefaultColor('song') ? colorSong.value : '',
+    artistColor: colorArtist.value !== getDefaultColor('artist') ? colorArtist.value : '',
+    usernameColor: colorUsername.value !== getDefaultColor('username') ? colorUsername.value : ''
   });
   return `${location.origin}/dala/embed.html?id=${encodeURIComponent(userId)}&${params.toString()}`;
+}
+
+function getDefaultColor(type) {
+  return isCardLightTheme ? defaultColorsLight[type] : defaultColors[type];
+}
+
+function updateColors() {
+  const root = document.documentElement;
+  root.style.setProperty('--song-color', colorSong.value);
+  root.style.setProperty('--artist-color', colorArtist.value);
+  root.style.setProperty('--username-color', colorUsername.value);
+}
+
+function resetColorInputs() {
+  colorSong.value = getDefaultColor('song');
+  colorArtist.value = getDefaultColor('artist');
+  colorUsername.value = getDefaultColor('username');
+  updateColors();
 }
 
 async function fetchSnapshot(uid) {
@@ -87,6 +130,9 @@ function renderPlayer() {
   cancelAnimationFrame(rafId);
   playerContainer.innerHTML = '';
 
+  // Update player container theme class
+  playerContainer.className = isCardLightTheme ? 'card-light' : '';
+
   if (!latestPresence) {
     playerContainer.innerHTML = `<div class="player"><div class="meta"><div class="song">No data</div><div class="artist muted">Enter a valid Discord ID</div></div></div>`;
     updateIframe();
@@ -124,7 +170,7 @@ function renderPlayer() {
 
   if (optUsername.checked && username) {
     const userEl = document.createElement('div');
-    userEl.className = 'username muted';
+    userEl.className = 'username';
     userEl.textContent = `@${username}`;
     meta.appendChild(userEl);
   }
@@ -171,13 +217,42 @@ function renderPlayer() {
   updateIframe();
 }
 
+function switchTheme(isLight) {
+  isCardLightTheme = isLight;
+  
+  if (isLight) {
+    themeLight.classList.add('active');
+    themeDark.classList.remove('active');
+  } else {
+    themeDark.classList.add('active');
+    themeLight.classList.remove('active');
+  }
+  
+  // Reset color inputs to new theme defaults
+  resetColorInputs();
+  renderPlayer();
+}
+
+// Event listeners
 btnLoad.addEventListener('click', async () => {
   const uid = inputId.value.trim();
   if (!uid) return alert('Enter a valid Discord ID');
-  currentUserId = uid;
-  latestPresence = await fetchSnapshot(uid);
-  renderPlayer();
-  openLanyardSocket(uid);
+  
+  btnLoad.textContent = 'Loading...';
+  btnLoad.disabled = true;
+  
+  try {
+    currentUserId = uid;
+    latestPresence = await fetchSnapshot(uid);
+    renderPlayer();
+    openLanyardSocket(uid);
+  } catch (error) {
+    console.error('Error loading:', error);
+    alert('Failed to load Discord data. Please check the ID and try again.');
+  } finally {
+    btnLoad.textContent = 'Load';
+    btnLoad.disabled = false;
+  }
 });
 
 btnClear.addEventListener('click', () => {
@@ -187,34 +262,67 @@ btnClear.addEventListener('click', () => {
   closeSocket();
 });
 
-btnCopyEmbed.addEventListener('click', () => {
+btnCopyEmbed.addEventListener('click', async () => {
   if (!currentUserId) return alert('Load a Discord ID first');
   const url = buildEmbed(currentUserId);
-  navigator.clipboard.writeText(url).then(() => {
-    btnCopyEmbed.textContent = 'Copied!';
-    setTimeout(() => (btnCopyEmbed.textContent = 'Copy Embed URL'), 1500);
-  });
+  
+  try {
+    await navigator.clipboard.writeText(url);
+    const originalText = btnCopyEmbed.textContent;
+    btnCopyEmbed.textContent = 'Copied! ✓';
+    btnCopyEmbed.style.background = 'var(--accent)';
+    btnCopyEmbed.style.color = '#000';
+    
+    setTimeout(() => {
+      btnCopyEmbed.textContent = originalText;
+      btnCopyEmbed.style.background = '';
+      btnCopyEmbed.style.color = '';
+    }, 2000);
+  } catch (error) {
+    alert('Failed to copy to clipboard');
+  }
 });
 
+// Toggle and input event listeners
 [inputCustom, optArtist, optProgress, optAlbum, optUsername].forEach((el) =>
   el.addEventListener('input', renderPlayer)
 );
 
-themeDark.addEventListener('click', () => {
-  document.body.classList.remove('light');
-  themeDark.classList.add('active');
-  themeLight.classList.remove('active');
+// Color input listeners
+[colorSong, colorArtist, colorUsername].forEach(input => {
+  input.addEventListener('input', () => {
+    updateColors();
+    renderPlayer();
+  });
+});
+
+// Color reset listeners
+resetSong.addEventListener('click', () => {
+  colorSong.value = getDefaultColor('song');
+  updateColors();
   renderPlayer();
 });
-themeLight.addEventListener('click', () => {
-  document.body.classList.add('light');
-  themeLight.classList.add('active');
-  themeDark.classList.remove('active');
+
+resetArtist.addEventListener('click', () => {
+  colorArtist.value = getDefaultColor('artist');
+  updateColors();
   renderPlayer();
 });
+
+resetUsername.addEventListener('click', () => {
+  colorUsername.value = getDefaultColor('username');
+  updateColors();
+  renderPlayer();
+});
+
+// Theme listeners
+themeDark.addEventListener('click', () => switchTheme(false));
+themeLight.addEventListener('click', () => switchTheme(true));
 
 function updateIframe() {
   iframePreview.src = currentUserId ? buildEmbed(currentUserId) : '';
 }
 
+// Initialize
+resetColorInputs();
 renderPlayer();
