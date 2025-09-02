@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Spotify Status Card — Lanyard</title>
+  <title>Spotify Status Card — Lanyard (Static)</title>
   <link rel="stylesheet" href="dala/styles.css">
   <link rel="icon" href="dala/favicon.svg" />
 </head>
@@ -11,7 +11,7 @@
   <main class="wrap">
     <header class="header">
       <h1>Spotify Status Card</h1>
-      <p class="muted">Live Discord status powered by Lanyard. Clean, modern, and embed-ready.</p>
+      <p class="muted">Live Discord card via Lanyard — clean, modern, mobile-friendly, embed-ready.</p>
     </header>
 
     <section class="controls card">
@@ -25,12 +25,10 @@
         <button id="btnCopyEmbed" class="btn" title="Copy embed URL">Copy Embed URL</button>
       </div>
       <label class="field">
-        <span>Custom Status Text (Optional)</span>
-        <input id="customText" placeholder="e.g. Currently vibing 🎶" />
+        <span>Custom Text (optional)</span>
+        <input id="inputCustom" placeholder="Your custom message here..." />
       </label>
-      <div class="small muted note">
-        To display Spotify, the Discord user must have their Spotify connected and Activity Status enabled.
-      </div>
+      <div class="small muted note">Spotify must be connected to Discord with Activity Status enabled.</div>
     </section>
 
     <section class="preview card" id="previewWrap">
@@ -39,7 +37,7 @@
       <div class="edit-row" id="editRow">
         <div class="toggles">
           <label class="switch"><input id="optArtist" type="checkbox" checked /><span>Artist</span></label>
-          <label class="switch"><input id="optProgress" type="checkbox" checked /><span>Progress Bar</span></label>
+          <label class="switch"><input id="optProgress" type="checkbox" checked /><span>Progress</span></label>
           <label class="switch"><input id="optAlbum" type="checkbox" checked /><span>Album Art</span></label>
           <label class="switch"><input id="optUsername" type="checkbox" checked /><span>Username</span></label>
         </div>
@@ -58,10 +56,9 @@
     </section>
 
     <footer class="muted small center">
-      Made with ❤️ and Lanyard magic. Clone & deploy with your Discord ID.
+      Clone & deploy — use a Discord ID. Built with ❤️ and a pinch of Lanyard magic.
     </footer>
   </main>
-
   <script type="module" src="dala/app.js"></script>
 </body>
 </html>
