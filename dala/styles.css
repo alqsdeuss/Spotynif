@@ -1,33 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  --bg-main: #0a0a0a;
-  --bg-secondary: #111111;
-  --bg-tertiary: #1a1a1a;
-  --bg-card: #0f0f0f;
+  --bg-main: #000000;
+  --bg-secondary: #0a0a0a;
+  --bg-tertiary: #121212;
+  --bg-card: #080808;
   --text-primary: #ffffff;
-  --text-secondary: #b3b3b3;
-  --text-muted: #666666;
-  --accent-green: #1DB954;
-  --accent-hover: #1ed760;
-  --accent-glow: rgba(29, 185, 84, 0.15);
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-medium: rgba(255, 255, 255, 0.12);
-  --glass-overlay: rgba(255, 255, 255, 0.03);
-  --glass-hover: rgba(255, 255, 255, 0.06);
-  --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.25);
-  --shadow-medium: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --shadow-strong: 0 16px 64px rgba(0, 0, 0, 0.6);
+  --text-secondary: #cccccc;
+  --text-muted: #888888;
+  --accent-primary: #ffffff;
+  --accent-hover: #f0f0f0;
+  --accent-glow: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-medium: rgba(255, 255, 255, 0.15);
+  --glass-overlay: rgba(255, 255, 255, 0.05);
+  --glass-hover: rgba(255, 255, 255, 0.08);
+  --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-medium: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-strong: 0 16px 64px rgba(0, 0, 0, 0.7);
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
 
-  --player-bg: #070707;
-  --player-glass: rgba(255, 255, 255, 0.03);
+  --player-bg: #050505;
+  --player-glass: rgba(255, 255, 255, 0.04);
   --player-text: #ffffff;
-  --player-muted: rgba(255, 255, 255, 0.7);
-  --player-border: rgba(255, 255, 255, 0.08);
+  --player-muted: rgba(255, 255, 255, 0.8);
+  --player-border: rgba(255, 255, 255, 0.1);
 }
 
 .card-light {
@@ -62,9 +62,9 @@ body::before {
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 20% 20%, var(--accent-glow) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(29, 185, 84, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 40% 60%, rgba(29, 185, 84, 0.04) 0%, transparent 40%);
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.01) 0%, transparent 40%);
   pointer-events: none;
   z-index: -1;
 }
@@ -87,7 +87,7 @@ body::before {
 .main-header h1 {
   font-size: clamp(36px, 5vw, 52px);
   font-weight: 800;
-  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-green) 100%);
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -156,7 +156,7 @@ body::before {
 }
 
 .input-label i {
-  color: var(--accent-green);
+  color: var(--text-primary);
   font-size: 16px;
 }
 
@@ -178,9 +178,9 @@ body::before {
 }
 
 .modern-input:focus {
-  border-color: var(--accent-green);
+  border-color: var(--text-primary);
   background: var(--bg-secondary);
-  box-shadow: 0 0 0 4px var(--accent-glow);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
   transform: translateY(-1px);
 }
 
@@ -225,16 +225,16 @@ body::before {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent-green), var(--accent-hover));
+  background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
   color: #000;
   font-weight: 700;
-  box-shadow: 0 4px 16px rgba(29, 185, 84, 0.3);
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--accent-hover), #22e760);
+  background: linear-gradient(135deg, var(--text-secondary), var(--text-primary));
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(29, 185, 84, 0.5);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.3);
 }
 
 .btn-secondary {
@@ -250,15 +250,15 @@ body::before {
 }
 
 .btn-active {
-  background: var(--accent-green);
+  background: var(--text-primary);
   color: #000;
   font-weight: 700;
-  border-color: var(--accent-green);
+  border-color: var(--text-primary);
 }
 
 .info-notice {
-  background: linear-gradient(135deg, var(--accent-glow), rgba(29, 185, 84, 0.05));
-  border: 1px solid rgba(29, 185, 84, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 18px;
   border-radius: var(--radius-md);
   font-size: 14px;
@@ -269,7 +269,7 @@ body::before {
 }
 
 .info-notice i {
-  color: var(--accent-green);
+  color: var(--text-primary);
   font-size: 20px;
   flex-shrink: 0;
 }
@@ -365,7 +365,7 @@ body::before {
 .custom-text {
   margin-top: 8px;
   font-size: 13px;
-  color: var(--accent-green);
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
@@ -399,7 +399,7 @@ body::before {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--progress-fill-color, var(--accent-green)), var(--progress-fill-end-color, var(--accent-hover)));
+  background: linear-gradient(90deg, var(--progress-fill-color, var(--text-primary)), var(--progress-fill-end-color, var(--text-secondary)));
   border-radius: 3px;
   transform-origin: left center;
   transform: scaleX(0);
@@ -441,7 +441,7 @@ body::before {
 }
 
 .group-title i {
-  color: var(--accent-green);
+  color: var(--text-primary);
   font-size: 18px;
 }
 
@@ -472,7 +472,7 @@ body::before {
 .toggle-switch input[type="checkbox"] {
   width: 18px;
   height: 18px;
-  accent-color: var(--accent-green);
+  accent-color: var(--text-primary);
   border-radius: 4px;
 }
 
@@ -515,7 +515,7 @@ input[type="color"] {
 }
 
 input[type="color"]:hover {
-  border-color: var(--accent-green);
+  border-color: var(--text-primary);
   transform: scale(1.05);
 }
 
@@ -544,8 +544,8 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 .color-reset-btn:hover {
-  border-color: var(--accent-green);
-  color: var(--accent-green);
+  border-color: var(--text-primary);
+  color: var(--text-primary);
   transform: translateY(-1px);
 }
 
