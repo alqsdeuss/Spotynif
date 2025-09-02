@@ -6,7 +6,6 @@ const customtxtbox = getid('customtxt');
 const loadbtn = getid('loadbtn');
 const clearbtn = getid('clearbtn');
 const copyembedurl = getid('copyembed');
-const playercontainer = getid('playerbox');
 const embedframe = getid('embedpreview');
 const notifcontainer = getid('notificationarea');
 const creditscontainer = getid('creditsinfo');
@@ -217,105 +216,6 @@ function calculateprogress(spotifydata) {
 }
 
 function renderplayer() {
-  if (animframe) {
-    cancelAnimationFrame(animframe);
-  }
-  
-  playercontainer.innerHTML = '';
-  playercontainer.className = islighttheme ? 'card-light' : '';
-
-  if (!userdata) {
-    playercontainer.innerHTML = `
-      <div class="player">
-        <div class="meta">
-          <div class="song">No data available</div>
-          <div class="artist">Enter a valid Discord ID</div>
-        </div>
-      </div>`;
-    updateembedframe();
-    return;
-  }
-
-  const spotifyinfo = userdata.spotify;
-  const discorduser = userdata.discord_user;
-  const username = discorduser?.username;
-  const customtext = customtxtbox.value.trim();
-
-  const playercard = document.createElement('div');
-  playercard.className = 'player';
-
-  if (showalbumbox.checked && spotifyinfo?.album_art_url) {
-    const albumimage = document.createElement('img');
-    albumimage.className = 'art';
-    albumimage.src = spotifyinfo.album_art_url;
-    albumimage.onerror = () => albumimage.style.display = 'none';
-    playercard.appendChild(albumimage);
-  }
-
-  const metadata = document.createElement('div');
-  metadata.className = 'meta';
-
-  const songtitle = document.createElement('div');
-  songtitle.className = 'song';
-  songtitle.textContent = spotifyinfo?.song ?? '— Not listening';
-  metadata.appendChild(songtitle);
-
-  if (showartistbox.checked && spotifyinfo?.artist) {
-    const artistname = document.createElement('div');
-    artistname.className = 'artist';
-    artistname.textContent = spotifyinfo.artist;
-    metadata.appendChild(artistname);
-  }
-
-  if (showuserbox.checked && username) {
-    const usernametext = document.createElement('div');
-    usernametext.className = 'username';
-    usernametext.textContent = `@${username}`;
-    metadata.appendChild(usernametext);
-  }
-
-  if (customtext) {
-    const customtextdiv = document.createElement('div');
-    customtextdiv.className = 'custom-text';
-    customtextdiv.textContent = customtext;
-    metadata.appendChild(customtextdiv);
-  }
-
-  if (showprogressbox.checked && spotifyinfo) {
-    const timerow = document.createElement('div');
-    timerow.className = 'time-row';
-    const currenttime = document.createElement('span');
-    const totaltime = document.createElement('span');
-    timerow.appendChild(currenttime);
-    timerow.appendChild(totaltime);
-
-    const progressbar = document.createElement('div');
-    progressbar.className = 'progress-bar';
-    const progressfill = document.createElement('div');
-    progressfill.className = 'progress-fill';
-    progressbar.appendChild(progressfill);
-
-    metadata.appendChild(timerow);
-    metadata.appendChild(progressbar);
-
-    function updateprogress() {
-      const progress = calculateprogress(spotifyinfo);
-      if (progress && spotifyinfo.timestamps) {
-        currenttime.textContent = formattime(progress.elapsed);
-        totaltime.textContent = formattime(progress.duration);
-        progressfill.style.transform = `scaleX(${progress.percent})`;
-      } else {
-        currenttime.textContent = '--:--';
-        totaltime.textContent = '--:--';
-        progressfill.style.transform = 'scaleX(0)';
-      }
-      animframe = requestAnimationFrame(updateprogress);
-    }
-    updateprogress();
-  }
-
-  playercard.appendChild(metadata);
-  playercontainer.appendChild(playercard);
   updateembedframe();
 }
 
