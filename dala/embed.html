@@ -1,266 +1,274 @@
 <!doctype html>
-<html lang="ro">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Embed — Spotify Status Card</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    /* Embed-specific overrides */
-    html,body,#root{height:100%; margin:0}
-    body{display:flex; align-items:center; justify-content:center; padding:8px}
-    .container{width:100%; max-width:420px}
+    html, body, #embedroot {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
     
-    /* Custom color variables will be set by JavaScript */
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      background: transparent;
+    }
+    
+    #embedroot {
+      width: 100%;
+      max-width: 420px;
+    }
   </style>
 </head>
 <body>
-  <div id="root" class="container"></div>
+  <div id="embedroot"></div>
 
   <script>
-    // Enhanced embed script with color support
-    (function(){
-      const params = new URLSearchParams(location.search);
-      const id = params.get('id') || params.get('uid') || '';
-      const showArtist = params.get('showArtist') !== 'false';
-      const showProgress = params.get('showProgress') !== 'false';
-      const showAlbum = params.get('showAlbum') !== 'false';
-      const showUsername = params.get('showUsername') !== 'false';
-      const theme = params.get('theme') === 'light' ? 'light' : 'dark';
-      const customText = params.get('custom') || '';
+    (function() {
+      const urlparams = new URLSearchParams(location.search);
+      const discordid = urlparams.get('id') || urlparams.get('uid') || '';
+      const showartist = urlparams.get('showArtist') !== 'false';
+      const showprogress = urlparams.get('showProgress') !== 'false';
+      const showalbum = urlparams.get('showAlbum') !== 'false';
+      const showusername = urlparams.get('showUsername') !== 'false';
+      const cardtheme = urlparams.get('theme') === 'light' ? 'light' : 'dark';
+      const customtxt = urlparams.get('custom') || '';
       
-      // Custom colors from URL params
-      const songColor = params.get('songColor') || '';
-      const artistColor = params.get('artistColor') || '';
-      const usernameColor = params.get('usernameColor') || '';
-      const progressColor = params.get('progressColor') || '';
+      const customsongcolor = urlparams.get('songColor') || '';
+      const customartistcolor = urlparams.get('artistColor') || '';
+      const customusernamecolor = urlparams.get('usernameColor') || '';
+      const customprogressbgcolor = urlparams.get('progressBgColor') || '';
+      const customprogressfillcolor = urlparams.get('progressFillColor') || '';
+      const customprogressendcolor = urlparams.get('progressEndColor') || '';
 
-      // Apply theme
-      if (theme === 'light') {
+      if (cardtheme === 'light') {
         document.body.classList.add('card-light');
       }
 
-      // Apply custom colors
-      const root = document.documentElement;
-      if (songColor) root.style.setProperty('--song-color', songColor);
-      if (artistColor) root.style.setProperty('--artist-color', artistColor);
-      if (usernameColor) root.style.setProperty('--username-color', usernameColor);
-      if (progressColor) root.style.setProperty('--progress-color', progressColor);
+      const documentroot = document.documentElement;
+      if (customsongcolor) documentroot.style.setProperty('--song-color', customsongcolor);
+      if (customartistcolor) documentroot.style.setProperty('--artist-color', customartistcolor);
+      if (customusernamecolor) documentroot.style.setProperty('--username-color', customusernamecolor);
+      if (customprogressbgcolor) documentroot.style.setProperty('--progress-bg-color', customprogressbgcolor);
+      if (customprogressfillcolor) documentroot.style.setProperty('--progress-fill-color', customprogressfillcolor);
+      if (customprogressendcolor) documentroot.style.setProperty('--progress-fill-end-color', customprogressendcolor);
 
-      const rootEl = document.getElementById('root');
+      const rootcontainer = document.getElementById('embedroot');
 
-      if (!id){
-        rootEl.innerHTML = '<div class="player"><div class="meta"><div class="song">Missing ID</div><div class="artist">Please provide a Discord user ID</div></div></div>';
+      if (!discordid) {
+        rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">Missing ID</div><div class="artist">Please provide a Discord user ID</div></div></div>';
         return;
       }
 
-      // Helper functions
-      const fmt = ms => {
+      const formatduration = ms => {
         if (!ms) return '0:00';
-        const s = Math.floor(ms/1000);
-        const m = Math.floor(s/60);
-        const ss = String(s%60).padStart(2,'0');
-        return `${m}:${ss}`;
+        const seconds = Math.floor(ms / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const remainingsecs = String(seconds % 60).padStart(2, '0');
+        return `${minutes}:${remainingsecs}`;
       };
 
-      let ws = null, heartbeat = null, presence = null, raf = null;
+      let connection = null;
+      let heartbeat = null;
+      let presencedata = null;
+      let frameanimation = null;
 
-      function computeProgress(spotify){
-        if (!spotify || !spotify.timestamps) return null;
-        const start = spotify.timestamps.start;
-        const end = spotify.timestamps.end;
-        if (!start || !end) return null;
-        const dur = end - start;
-        const elapsed = Date.now() - start;
-        const pct = Math.max(0, Math.min(1, elapsed/dur));
-        return { elapsed, dur, pct };
+      function getprogress(spotifydata) {
+        if (!spotifydata || !spotifydata.timestamps) return null;
+        const starttime = spotifydata.timestamps.start;
+        const endtime = spotifydata.timestamps.end;
+        if (!starttime || !endtime) return null;
+        
+        const totaldur = endtime - starttime;
+        const currentelapsed = Date.now() - starttime;
+        const progresspct = Math.max(0, Math.min(1, currentelapsed / totaldur));
+        
+        return { 
+          elapsed: currentelapsed, 
+          duration: totaldur, 
+          percent: progresspct 
+        };
       }
 
-      function render(){
-        if (raf) cancelAnimationFrame(raf);
+      function drawplayer() {
+        if (frameanimation) cancelAnimationFrame(frameanimation);
         
-        if (!presence){
-          rootEl.innerHTML = '<div class="player"><div class="meta"><div class="song">No data</div><div class="artist muted">Connecting...</div></div></div>';
+        if (!presencedata) {
+          rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">No data</div><div class="artist">Connecting...</div></div></div>';
           return;
         }
 
-        const spotify = presence.spotify ?? null;
-        const username = presence.discord_user?.username ?? null;
+        const spotifyinfo = presencedata.spotify ?? null;
+        const discorduser = presencedata.discord_user?.username ?? null;
         
-        rootEl.innerHTML = '';
+        rootcontainer.innerHTML = '';
         
-        const card = document.createElement('div');
-        card.className = 'player';
+        const playercard = document.createElement('div');
+        playercard.className = 'player';
         
-        // Album art
-        if (showAlbum && spotify?.album_art_url){
-          const img = document.createElement('img');
-          img.className = 'art';
-          img.src = spotify.album_art_url;
-          img.onerror = () => img.style.display = 'none';
-          card.appendChild(img);
+        if (showalbum && spotifyinfo?.album_art_url) {
+          const albumart = document.createElement('img');
+          albumart.className = 'art';
+          albumart.src = spotifyinfo.album_art_url;
+          albumart.onerror = () => albumart.style.display = 'none';
+          playercard.appendChild(albumart);
         }
         
-        const meta = document.createElement('div');
-        meta.className = 'meta';
+        const trackinfo = document.createElement('div');
+        trackinfo.className = 'meta';
         
-        // Song title
-        const song = document.createElement('div');
-        song.className = 'song';
-        song.textContent = spotify?.song ?? '— Not listening';
-        meta.appendChild(song);
+        const tracktitle = document.createElement('div');
+        tracktitle.className = 'song';
+        tracktitle.textContent = spotifyinfo?.song ?? '— Not listening';
+        trackinfo.appendChild(tracktitle);
         
-        // Artist
-        if (showArtist && spotify?.artist){
-          const artist = document.createElement('div');
-          artist.className = 'artist';
-          artist.textContent = spotify.artist;
-          meta.appendChild(artist);
+        if (showartist && spotifyinfo?.artist) {
+          const trackartist = document.createElement('div');
+          trackartist.className = 'artist';
+          trackartist.textContent = spotifyinfo.artist;
+          trackinfo.appendChild(trackartist);
         }
         
-        // Username
-        if (showUsername && username){
-          const un = document.createElement('div');
-          un.className = 'username';
-          un.textContent = `@${username}`;
-          meta.appendChild(un);
+        if (showusername && discorduser) {
+          const username = document.createElement('div');
+          username.className = 'username';
+          username.textContent = `@${discorduser}`;
+          trackinfo.appendChild(username);
         }
         
-        // Custom text
-        if (customText){
-          const custom = document.createElement('div');
-          custom.className = 'custom-text';
-          custom.textContent = customText;
-          meta.appendChild(custom);
+        if (customtxt) {
+          const custommsg = document.createElement('div');
+          custommsg.className = 'custom-text';
+          custommsg.textContent = customtxt;
+          trackinfo.appendChild(custommsg);
         }
         
-        // Progress bar
-        if (showProgress && spotify){
-          const timeRow = document.createElement('div');
-          timeRow.className = 'time-row';
-          const left = document.createElement('span');
-          const right = document.createElement('span');
-          left.textContent = '--:--';
-          right.textContent = '--:--';
-          timeRow.appendChild(left);
-          timeRow.appendChild(right);
+        if (showprogress && spotifyinfo) {
+          const timedisplay = document.createElement('div');
+          timedisplay.className = 'time-row';
+          const currenttime = document.createElement('span');
+          const totaltime = document.createElement('span');
+          currenttime.textContent = '--:--';
+          totaltime.textContent = '--:--';
+          timedisplay.appendChild(currenttime);
+          timedisplay.appendChild(totaltime);
           
-          const bar = document.createElement('div');
-          bar.className = 'progress-bar';
-          const fill = document.createElement('div');
-          fill.className = 'progress-fill';
-          bar.appendChild(fill);
+          const progressbar = document.createElement('div');
+          progressbar.className = 'progress-bar';
+          const progressfill = document.createElement('div');
+          progressfill.className = 'progress-fill';
+          progressbar.appendChild(progressfill);
           
-          meta.appendChild(timeRow);
-          meta.appendChild(bar);
+          trackinfo.appendChild(timedisplay);
+          trackinfo.appendChild(progressbar);
 
-          // Animation loop for progress
-          function tick(){
-            const p = computeProgress(spotify);
-            if (p && spotify.timestamps){
-              left.textContent = fmt(p.elapsed);
-              right.textContent = fmt(p.dur);
-              fill.style.transform = `scaleX(${p.pct})`;
+          function updateprogress() {
+            const progress = getprogress(spotifyinfo);
+            if (progress && spotifyinfo.timestamps) {
+              currenttime.textContent = formatduration(progress.elapsed);
+              totaltime.textContent = formatduration(progress.duration);
+              progressfill.style.transform = `scaleX(${progress.percent})`;
             } else {
-              left.textContent = '--:--';
-              right.textContent = '--:--';
-              fill.style.transform = 'scaleX(0)';
+              currenttime.textContent = '--:--';
+              totaltime.textContent = '--:--';
+              progressfill.style.transform = 'scaleX(0)';
             }
-            raf = requestAnimationFrame(tick);
+            frameanimation = requestAnimationFrame(updateprogress);
           }
-          tick();
+          updateprogress();
         }
 
-        card.appendChild(meta);
-        rootEl.appendChild(card);
+        playercard.appendChild(trackinfo);
+        rootcontainer.appendChild(playercard);
       }
 
-      async function fetchSnapshot(){
-        try{
-          const response = await fetch(`https://api.lanyard.rest/v1/users/${id}`);
-          const json = await response.json();
-          if (json && json.success && json.data){
-            presence = json.data;
-            render();
+      async function getinitialdata() {
+        try {
+          const response = await fetch(`https://api.lanyard.rest/v1/users/${discordid}`);
+          const jsondata = await response.json();
+          if (jsondata && jsondata.success && jsondata.data) {
+            presencedata = jsondata.data;
+            drawplayer();
           }
-        } catch(e) {
-          console.warn('Failed to fetch snapshot:', e);
+        } catch (error) {
+          console.warn('initial fetch failed:', error);
         }
       }
 
-      function openSocket(){
-        if (ws) {
-          ws.close();
+      function connectwebsocket() {
+        if (connection) {
+          connection.close();
         }
         
-        ws = new WebSocket('wss://api.lanyard.rest/socket');
+        connection = new WebSocket('wss://api.lanyard.rest/socket');
         
-        ws.addEventListener('open', () => {
-          console.log('WebSocket connected');
+        connection.addEventListener('open', () => {
+          console.log('websocket connected');
         });
         
-        ws.addEventListener('message', (event) => {
-          try{
+        connection.addEventListener('message', (event) => {
+          try {
             const message = JSON.parse(event.data);
             const { op, d, t } = message;
             
-            if (op === 1 && d?.heartbeat_interval){
-              // Send subscription
-              ws.send(JSON.stringify({ 
+            if (op === 1 && d?.heartbeat_interval) {
+              connection.send(JSON.stringify({ 
                 op: 2, 
-                d: { subscribe_to_id: id } 
+                d: { subscribe_to_id: discordid } 
               }));
               
-              // Start heartbeat
               if (heartbeat) clearInterval(heartbeat);
               heartbeat = setInterval(() => {
-                if (ws && ws.readyState === WebSocket.OPEN) {
-                  ws.send(JSON.stringify({ op: 3 }));
+                if (connection && connection.readyState === WebSocket.OPEN) {
+                  connection.send(JSON.stringify({ op: 3 }));
                 }
               }, d.heartbeat_interval);
               
             } else if (op === 0) {
-              if (t === 'INIT_STATE'){
-                presence = d[id] ?? d;
-              } else if (t === 'PRESENCE_UPDATE'){
-                presence = d;
+              if (t === 'INIT_STATE') {
+                presencedata = d[discordid] ?? d;
+              } else if (t === 'PRESENCE_UPDATE') {
+                presencedata = d;
               }
-              render();
+              drawplayer();
             }
-          } catch(e) {
-            console.warn('WebSocket message error:', e);
+          } catch (error) {
+            console.warn('websocket message error:', error);
           }
         });
 
-        ws.addEventListener('close', (event) => {
-          console.log('WebSocket closed:', event.code, event.reason);
+        connection.addEventListener('close', (event) => {
+          console.log('websocket closed:', event.code, event.reason);
           if (heartbeat) {
             clearInterval(heartbeat);
             heartbeat = null;
           }
           
-          // Retry connection after 3 seconds if not intentionally closed
           if (event.code !== 1000) {
-            setTimeout(openSocket, 3000);
+            setTimeout(connectwebsocket, 3000);
           }
         });
 
-        ws.addEventListener('error', (error) => {
-          console.warn('WebSocket error:', error);
+        connection.addEventListener('error', (error) => {
+          console.warn('websocket error:', error);
         });
       }
 
-      // Initialize
-      fetchSnapshot();
-      openSocket();
+      getinitialdata();
+      connectwebsocket();
 
-      // Cleanup on page unload
       window.addEventListener('beforeunload', () => {
-        if (ws) {
-          try { ws.close(1000); } catch(e) {}
+        if (connection) {
+          try { connection.close(1000); } catch(e) {}
         }
         if (heartbeat) clearInterval(heartbeat);
-        if (raf) cancelAnimationFrame(raf);
+        if (frameanimation) cancelAnimationFrame(frameanimation);
       });
 
     })();
