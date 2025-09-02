@@ -201,7 +201,7 @@
           connection.close();
         }
         
-        connection = new WebSocket('https://api.lanyard.rest/v1/users/${discordid}');
+        connection = new WebSocket('wss://api.lanyard.rest/v1/users/${discordid}');
         connection.addEventListener('open', () => {
           console.log('websocket connected');
         });
