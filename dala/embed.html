@@ -45,16 +45,13 @@
       const cardtheme = urlparams.get('theme') === 'light' ? 'light' : 'dark';
       const customtxt = urlparams.get('custom') || '';
       
-      // Colors
       const customsongcolor = urlparams.get('songColor') || '';
       const customartistcolor = urlparams.get('artistColor') || '';
       const customusernamecolor = urlparams.get('usernameColor') || '';
       const customtextcolor = urlparams.get('customTextColor') || '';
       const customprogressbgcolor = urlparams.get('progressBgColor') || '';
       const customprogressfillcolor = urlparams.get('progressFillColor') || '';
-      const customprogressendcolor = urlparams.get('progressEndColor') || '';
       
-      // Effects
       const songeffect = urlparams.get('songEffect') || 'none';
       const artisteffect = urlparams.get('artistEffect') || 'none';
       const usernameeffect = urlparams.get('usernameEffect') || 'none';
@@ -66,12 +63,10 @@
       const progressheight = urlparams.get('progressHeight') || '6';
       const progressradius = urlparams.get('progressRadius') || '3';
 
-      // Apply theme
       if (cardtheme === 'light') {
         document.body.classList.add('cardlight');
       }
 
-      // Apply custom CSS variables
       const documentroot = document.documentElement;
       if (customsongcolor) documentroot.style.setProperty('--song-color', customsongcolor);
       if (customartistcolor) documentroot.style.setProperty('--artist-color', customartistcolor);
@@ -79,7 +74,6 @@
       if (customtextcolor) documentroot.style.setProperty('--customtext-color', customtextcolor);
       if (customprogressbgcolor) documentroot.style.setProperty('--progress-bg-color', customprogressbgcolor);
       if (customprogressfillcolor) documentroot.style.setProperty('--progress-fill-color', customprogressfillcolor);
-      if (customprogressendcolor) documentroot.style.setProperty('--progress-fill-end-color', customprogressendcolor);
       documentroot.style.setProperty('--progress-height', progressheight + 'px');
       documentroot.style.setProperty('--progress-radius', progressradius + 'px');
       
@@ -90,7 +84,6 @@
         return;
       }
 
-      // Utility functions
       const formatduration = ms => {
         if (!ms) return '0:00';
         const seconds = Math.floor(ms / 1000);
@@ -145,7 +138,6 @@
         playercard = document.createElement('div');
         playercard.className = 'player';
         
-        // Apply card effects
         if (cardentrance !== 'none') {
           playercard.classList.add(cardentrance);
         }
@@ -153,7 +145,6 @@
           playercard.classList.add('hover' + cardhover);
         }
         
-        // Album art
         if (showalbum) {
           albumart = document.createElement('img');
           albumart.className = 'art';
@@ -165,25 +156,21 @@
           playercard.appendChild(albumart);
         }
         
-        // Track info container
         const trackinfo = document.createElement('div');
         trackinfo.className = 'meta';
         
-        // Status indicator
         if (showstatus) {
           statusdot = document.createElement('div');
           statusdot.className = 'statusindicator statusoffline';
           trackinfo.appendChild(statusdot);
         }
         
-        // Song title
         tracktitle = document.createElement('div');
         tracktitle.className = 'song';
         tracktitle.textContent = '— not listening';
         applyeffect(tracktitle, songeffect);
         trackinfo.appendChild(tracktitle);
         
-        // Artist
         if (showartist) {
           trackartist = document.createElement('div');
           trackartist.className = 'artist';
@@ -192,7 +179,6 @@
           trackinfo.appendChild(trackartist);
         }
         
-        // Username
         if (showusername) {
           username = document.createElement('div');
           username.className = 'username';
@@ -201,7 +187,6 @@
           trackinfo.appendChild(username);
         }
         
-        // Custom text
         if (customtxt) {
           custommsg = document.createElement('div');
           custommsg.className = 'customtext';
@@ -210,7 +195,6 @@
           trackinfo.appendChild(custommsg);
         }
         
-        // Progress and time
         if (showprogress && showduration) {
           const timedisplay = document.createElement('div');
           timedisplay.className = 'timerow';
@@ -256,7 +240,6 @@
         const discorduser = presencedata.discord_user?.username ?? null;
         const discordstatus = presencedata.discord_status || 'offline';
         
-        // Update song title
         if (tracktitle) {
           const songtitle = spotifyinfo?.song ?? '— not listening';
           if (songeffect === 'typing') {
@@ -266,7 +249,6 @@
           }
         }
         
-        // Update artist
         if (trackartist && showartist) {
           if (spotifyinfo?.artist) {
             const artistname = spotifyinfo.artist;
@@ -281,7 +263,6 @@
           }
         }
         
-        // Update album art
         if (albumart && showalbum) {
           if (spotifyinfo?.album_art_url) {
             albumart.src = spotifyinfo.album_art_url;
@@ -291,7 +272,6 @@
           }
         }
         
-        // Update username
         if (username && showusername) {
           if (discorduser) {
             const displayname = `@${discorduser}`;
@@ -306,7 +286,6 @@
           }
         }
         
-        // Update status
         if (statusdot && showstatus) {
           statusdot.className = `statusindicator status${discordstatus}`;
         }
@@ -391,7 +370,6 @@
         }
       }
 
-      // Initialize
       startrefreshloop();
       window.addEventListener('beforeunload', () => {
         stoprefreshloop();
