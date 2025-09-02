@@ -8,6 +8,7 @@ const clearbtn = getid('clearbtn');
 const copyembedurl = getid('copyembed');
 const playercontainer = getid('playerbox');
 const embedframe = getid('embedpreview');
+const notifcontainer = getid('notificationarea');
 
 const showartistbox = getid('showartist');
 const showprogressbox = getid('showprogress');
@@ -54,6 +55,38 @@ const defaultlightcolors = {
   progressfill: '#1DB954',
   progressend: '#1ed760'
 };
+
+function shownotif(message, type = 'info') {
+  const notif = document.createElement('div');
+  notif.className = `notification ${type}`;
+  
+  const icon = document.createElement('i');
+  if (type === 'success') {
+    icon.className = 'fas fa-check-circle';
+  } else if (type === 'error') {
+    icon.className = 'fas fa-exclamation-circle';
+  } else {
+    icon.className = 'fas fa-info-circle';
+  }
+  
+  const text = document.createElement('span');
+  text.textContent = message;
+  
+  notif.appendChild(icon);
+  notif.appendChild(text);
+  notifcontainer.appendChild(notif);
+  
+  setTimeout(() => notif.classList.add('show'), 100);
+  
+  setTimeout(() => {
+    notif.classList.remove('show');
+    setTimeout(() => {
+      if (notif.parentNode) {
+        notif.parentNode.removeChild(notif);
+      }
+    }, 400);
+  }, 4000);
+}
 
 function buildembed(userid) {
   const params = new URLSearchParams({
@@ -307,7 +340,7 @@ function updateembedframe() {
 loadbtn.addEventListener('click', async () => {
   const userid = useridbox.value.trim();
   if (!userid) {
-    shownotification('Please enter a valid Discord ID', 'error');
+    shownotif('Please enter a valid Discord ID', 'error');
     return;
   }
   
@@ -319,10 +352,10 @@ loadbtn.addEventListener('click', async () => {
     userdata = await fetchuserdata(userid);
     renderplayer();
     startwebsocket(userid);
-    shownotification('Discord data loaded successfully!', 'success');
+    shownotif('Discord data loaded successfully!', 'success');
   } catch (error) {
     console.error('loading error:', error);
-    shownotification('Failed to load Discord data. Please check the ID and try again.', 'error');
+    shownotif('Failed to load Discord data. Please check the ID and try again.', 'error');
   } finally {
     loadbtn.textContent = 'Load';
     loadbtn.disabled = false;
@@ -340,7 +373,7 @@ clearbtn.addEventListener('click', () => {
 
 copyembedurl.addEventListener('click', async () => {
   if (!currentuser) {
-    shownotification('Load a Discord ID first', 'error');
+    shownotif('Load a Discord ID first', 'error');
     return;
   }
   
@@ -348,10 +381,10 @@ copyembedurl.addEventListener('click', async () => {
   
   try {
     await navigator.clipboard.writeText(embedurl);
-    shownotification('Embed URL copied to clipboard!', 'success');
+    shownotif('Embed URL copied to clipboard!', 'success');
   } catch (error) {
     console.error('clipboard error:', error);
-    shownotification('Failed to copy to clipboard', 'error');
+    shownotif('Failed to copy to clipboard', 'error');
   }
 });
 
