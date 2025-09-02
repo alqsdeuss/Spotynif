@@ -59,6 +59,7 @@
       if (customprogressbgcolor) documentroot.style.setProperty('--progress-bg-color', customprogressbgcolor);
       if (customprogressfillcolor) documentroot.style.setProperty('--progress-fill-color', customprogressfillcolor);
       if (customprogressendcolor) documentroot.style.setProperty('--progress-fill-end-color', customprogressendcolor);
+      
       const rootcontainer = document.getElementById('embedroot');
 
       if (!discordid) {
@@ -78,6 +79,8 @@
       let heartbeat = null;
       let presencedata = null;
       let frameanimation = null;
+      let reconnectAttempts = 0;
+      const maxReconnectAttempts = 5;
 
       function getprogress(spotifydata) {
         if (!spotifydata || !spotifydata.timestamps) return null;
@@ -190,68 +193,92 @@
           if (jsondata && jsondata.success && jsondata.data) {
             presencedata = jsondata.data;
             drawplayer();
+          } else {
+            console.warn('Failed to get initial data:', jsondata);
           }
         } catch (error) {
-          console.warn('initial fetch failed:', error);
+          console.warn('Initial fetch failed:', error);
+        }
+      }
+
+      function connectWithRetry() {
+        if (reconnectAttempts >= maxReconnectAttempts) {
+          console.log('Max WebSocket reconnection attempts reached');
+          return;
+        }
+
+        try {
+          if (connection) {
+            connection.close();
+          }
+          
+          connection = new WebSocket(`wss://api.lanyard.rest/v1/users/${discordid}`);
+          
+          connection.addEventListener('open', () => {
+            console.log('WebSocket connected successfully');
+            reconnectAttempts = 0;
+          });
+          
+          connection.addEventListener('message', (event) => {
+            try {
+              const message = JSON.parse(event.data);
+              const { op, d, t } = message;
+              
+              if (op === 1 && d?.heartbeat_interval) {
+                connection.send(JSON.stringify({ 
+                  op: 2, 
+                  d: { subscribe_to_id: discordid } 
+                }));
+                
+                if (heartbeat) clearInterval(heartbeat);
+                heartbeat = setInterval(() => {
+                  if (connection && connection.readyState === WebSocket.OPEN) {
+                    connection.send(JSON.stringify({ op: 3 }));
+                  }
+                }, d.heartbeat_interval);
+                
+              } else if (op === 0) {
+                if (t === 'INIT_STATE') {
+                  presencedata = d[discordid] ?? d;
+                } else if (t === 'PRESENCE_UPDATE') {
+                  presencedata = d;
+                }
+                drawplayer();
+              }
+            } catch (error) {
+              console.warn('WebSocket message error:', error);
+            }
+          });
+
+          connection.addEventListener('close', (event) => {
+            console.log('WebSocket closed with code:', event.code);
+            if (heartbeat) {
+              clearInterval(heartbeat);
+              heartbeat = null;
+            }
+            
+            if (event.code !== 1000 && reconnectAttempts < maxReconnectAttempts) {
+              reconnectAttempts++;
+              console.log(`Attempting WebSocket reconnection ${reconnectAttempts}/${maxReconnectAttempts}`);
+              setTimeout(connectWithRetry, 3000 * reconnectAttempts);
+            }
+          });
+
+          connection.addEventListener('error', (error) => {
+            console.warn('WebSocket error occurred');
+          });
+
+        } catch (error) {
+          console.error('Failed to create WebSocket connection:', error);
+          reconnectAttempts++;
+          if (reconnectAttempts < maxReconnectAttempts) {
+            setTimeout(connectWithRetry, 3000 * reconnectAttempts);
+          }
         }
       }
 
       function connectwebsocket() {
-        if (connection) {
-          connection.close();
-        }
-        
-        connection = new WebSocket('wss://api.lanyard.rest/v1/users/${discordid}');
-        connection.addEventListener('open', () => {
-          console.log('websocket connected');
-        });
-        
-        connection.addEventListener('message', (event) => {
-          try {
-            const message = JSON.parse(event.data);
-            const { op, d, t } = message;
-            
-            if (op === 1 && d?.heartbeat_interval) {
-              connection.send(JSON.stringify({ 
-                op: 2, 
-                d: { subscribe_to_id: discordid } 
-              }));
-              
-              if (heartbeat) clearInterval(heartbeat);
-              heartbeat = setInterval(() => {
-                if (connection && connection.readyState === WebSocket.OPEN) {
-                  connection.send(JSON.stringify({ op: 3 }));
-                }
-              }, d.heartbeat_interval);
-              
-            } else if (op === 0) {
-              if (t === 'INIT_STATE') {
-                presencedata = d[discordid] ?? d;
-              } else if (t === 'PRESENCE_UPDATE') {
-                presencedata = d;
-              }
-              drawplayer();
-            }
-          } catch (error) {
-            console.warn('websocket message error:', error);
-          }
-        });
-
-        connection.addEventListener('close', (event) => {
-          console.log('websocket closed:', event.code, event.reason);
-          if (heartbeat) {
-            clearInterval(heartbeat);
-            heartbeat = null;
-          }
-          
-          if (event.code !== 1000) {
-            setTimeout(connectwebsocket, 3000);
-          }
-        });
-
-        connection.addEventListener('error', (error) => {
-          console.warn('websocket error:', error);
-        });
+        connectWithRetry();
       }
 
       getinitialdata();
