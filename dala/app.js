@@ -20,9 +20,11 @@ const themeLight = byId('themeLight');
 const colorSong = byId('colorSong');
 const colorArtist = byId('colorArtist');
 const colorUsername = byId('colorUsername');
+const colorProgress = byId('colorProgress');
 const resetSong = byId('resetSong');
 const resetArtist = byId('resetArtist');
 const resetUsername = byId('resetUsername');
+const resetProgress = byId('resetProgress');
 
 let currentUserId = null;
 let ws = null;
@@ -33,15 +35,17 @@ let isCardLightTheme = false;
 
 // Default colors
 const defaultColors = {
-  song: '#ffffff',
-  artist: '#a6a6a6',
-  username: '#a6a6a6'
+  song: '#e8e8e8',
+  artist: '#888888',
+  username: '#888888',
+  progress: '#00d474'
 };
 
 const defaultColorsLight = {
-  song: '#0b0b0b',
+  song: '#1a1a1a',
   artist: '#666666',
-  username: '#666666'
+  username: '#666666',
+  progress: '#00d474'
 };
 
 function buildEmbed(userId) {
@@ -54,7 +58,8 @@ function buildEmbed(userId) {
     custom: inputCustom.value || '',
     songColor: colorSong.value !== getDefaultColor('song') ? colorSong.value : '',
     artistColor: colorArtist.value !== getDefaultColor('artist') ? colorArtist.value : '',
-    usernameColor: colorUsername.value !== getDefaultColor('username') ? colorUsername.value : ''
+    usernameColor: colorUsername.value !== getDefaultColor('username') ? colorUsername.value : '',
+    progressColor: colorProgress.value !== getDefaultColor('progress') ? colorProgress.value : ''
   });
   return `${location.origin}/dala/embed.html?id=${encodeURIComponent(userId)}&${params.toString()}`;
 }
@@ -68,12 +73,14 @@ function updateColors() {
   root.style.setProperty('--song-color', colorSong.value);
   root.style.setProperty('--artist-color', colorArtist.value);
   root.style.setProperty('--username-color', colorUsername.value);
+  root.style.setProperty('--progress-color', colorProgress.value);
 }
 
 function resetColorInputs() {
   colorSong.value = getDefaultColor('song');
   colorArtist.value = getDefaultColor('artist');
   colorUsername.value = getDefaultColor('username');
+  colorProgress.value = getDefaultColor('progress');
   updateColors();
 }
 
@@ -289,7 +296,7 @@ btnCopyEmbed.addEventListener('click', async () => {
 );
 
 // Color input listeners
-[colorSong, colorArtist, colorUsername].forEach(input => {
+[colorSong, colorArtist, colorUsername, colorProgress].forEach(input => {
   input.addEventListener('input', () => {
     updateColors();
     renderPlayer();
@@ -311,6 +318,12 @@ resetArtist.addEventListener('click', () => {
 
 resetUsername.addEventListener('click', () => {
   colorUsername.value = getDefaultColor('username');
+  updateColors();
+  renderPlayer();
+});
+
+resetProgress.addEventListener('click', () => {
+  colorProgress.value = getDefaultColor('progress');
   updateColors();
   renderPlayer();
 });
