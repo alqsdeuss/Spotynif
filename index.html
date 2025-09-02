@@ -3,163 +3,305 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Spotify Status Card — Spotynif Tool</title>
+  <title>Spotynif — Enhanced Spotify Status Cards</title>
   <link rel="stylesheet" href="dala/styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="icon" href="dala/favicon.svg" />
-  <meta name="description" content="Create beautiful, customizable Spotify status cards with live Discord integration via Lanyard API & Spotynif Tool">
+  <meta name="description" content="Create stunning, highly customizable Spotify status cards with advanced text effects and animations">
 </head>
 <body>
   
-  <main class="main-wrap">
-    <div class="notification-container" id="notificationarea"></div>
-    <header class="main-header">
-      <h1>Spotynif Status</h1>
-      <p class="header-subtitle">Clean, responsive, embed-ready with custom colors</p>
+  <main class="mainwrap">
+    <div class="notifcontainer" id="notificationarea"></div>
+    
+    <header class="mainheader">
+      <div class="headerlogo">
+        <div class="logodot"></div>
+        <h1>spotynif</h1>
+      </div>
+      <p class="headersubtitle">enhanced spotify status cards with advanced customization</p>
     </header>
     
-    <div class="content-wrapper">
-      <div class="left-column">
-        <section class="control-panel glass-card">
-          <div class="input-section">
-            <label class="input-label">
+    <div class="contentwrapper">
+      <div class="leftcolumn">
+        <section class="controlpanel glasscard">
+          <div class="inputsection">
+            <label class="inputlabel">
               <i class="fab fa-discord"></i>
-              Discord User ID
+              discord user id
             </label>
-            <input id="userid" placeholder="e.g. 1170109139989561464" class="modern-input" inputmode="numeric" />
+            <input id="userid" placeholder="e.g. 1170109139989561464" class="moderninput" inputmode="numeric" />
           </div>
 
-          <div class="button-row">
-            <button id="loadbtn" class="modern-btn btn-primary">
+          <div class="buttonrow">
+            <button id="loadbtn" class="modernbtn btnprimary">
               <i class="fas fa-play"></i>
-              Load
+              load
             </button>
-            <button id="clearbtn" class="modern-btn btn-secondary">
+            <button id="clearbtn" class="modernbtn btnsecondary">
               <i class="fas fa-trash"></i>
-              Clear
+              clear
             </button>
-            <button id="copyembed" class="modern-btn btn-secondary">
+            <button id="copyembed" class="modernbtn btnsecondary">
               <i class="fas fa-copy"></i>
-              Copy Embed URL
+              copy embed url
             </button>
           </div>
           
-          <div class="input-section">
-            <label class="input-label">
+          <div class="inputsection">
+            <label class="inputlabel">
               <i class="fas fa-comment"></i>
-              Custom Text (optional)
+              custom text (optional)
             </label>
-            <input id="customtxt" placeholder="Your custom message here..." class="modern-input" />
+            <input id="customtxt" placeholder="your custom message..." class="moderninput" />
           </div>
           
-          <div class="info-notice">
+          <div class="infonotice">
             <i class="fas fa-info-circle"></i>
             <div>
-              <strong>Note:</strong> Spotify must be connected to Discord with Activity Status enabled.
+              <strong>note:</strong> spotify must be connected to discord with activity status enabled
             </div>
           </div>
         </section>
 
-        <section class="glass-card">
-          <div class="customization-grid">
-            <div class="settings-group">
-              <h3 class="group-title">
+        <section class="glasscard">
+          <div class="customizationgrid">
+            <div class="settingsgroup">
+              <h3 class="grouptitle">
                 <i class="fas fa-eye"></i>
-                Display Options
+                display options
               </h3>
-              <div class="toggle-list">
-                <label class="toggle-switch">
+              <div class="togglelist">
+                <label class="toggleswitch">
                   <input id="showartist" type="checkbox" checked />
-                  <span>Artist</span>
+                  <span>artist</span>
                 </label>
-                <label class="toggle-switch">
+                <label class="toggleswitch">
                   <input id="showprogress" type="checkbox" checked />
-                  <span>Progress</span>
+                  <span>progress bar</span>
                 </label>
-                <label class="toggle-switch">
+                <label class="toggleswitch">
                   <input id="showalbum" type="checkbox" checked />
-                  <span>Album Art</span>
+                  <span>album art</span>
                 </label>
-                <label class="toggle-switch">
+                <label class="toggleswitch">
                   <input id="showuser" type="checkbox" checked />
-                  <span>Username</span>
+                  <span>username</span>
+                </label>
+                <label class="toggleswitch">
+                  <input id="showduration" type="checkbox" checked />
+                  <span>duration</span>
+                </label>
+                <label class="toggleswitch">
+                  <input id="showstatus" type="checkbox" />
+                  <span>online status</span>
                 </label>
               </div>
             </div>
 
-            <div class="settings-group">
-              <h3 class="group-title">
-                <i class="fas fa-palette"></i>
-                Text Colors
+            <div class="settingsgroup">
+              <h3 class="grouptitle">
+                <i class="fas fa-magic"></i>
+                text effects
               </h3>
-              <div class="color-list">
-                <div class="color-item">
-                  <label>Song Title</label>
-                  <div class="color-picker-wrap">
-                    <input type="color" id="songcolor" value="#ffffff">
-                    <button type="button" class="color-reset-btn" id="resetsong">Reset</button>
-                  </div>
+              <div class="effectsgrid">
+                <div class="effectrow">
+                  <label class="effectlabel">song title effect</label>
+                  <select id="songtitleeffect" class="effectselect">
+                    <option value="none">none</option>
+                    <option value="rainbow">rainbow</option>
+                    <option value="typing">typing animation</option>
+                    <option value="glow">glow</option>
+                    <option value="gradient">gradient</option>
+                    <option value="pulse">pulse</option>
+                    <option value="wave">wave</option>
+                    <option value="flicker">flicker</option>
+                  </select>
                 </div>
-                <div class="color-item">
-                  <label>Artist Name</label>
-                  <div class="color-picker-wrap">
-                    <input type="color" id="artistcolor" value="#a6a6a6">
-                    <button type="button" class="color-reset-btn" id="resetartist">Reset</button>
-                  </div>
+                <div class="effectrow">
+                  <label class="effectlabel">artist effect</label>
+                  <select id="artisteffect" class="effectselect">
+                    <option value="none">none</option>
+                    <option value="rainbow">rainbow</option>
+                    <option value="typing">typing animation</option>
+                    <option value="glow">glow</option>
+                    <option value="gradient">gradient</option>
+                    <option value="pulse">pulse</option>
+                    <option value="wave">wave</option>
+                  </select>
                 </div>
-                <div class="color-item">
-                  <label>Username</label>
-                  <div class="color-picker-wrap">
-                    <input type="color" id="usercolor" value="#a6a6a6">
-                    <button type="button" class="color-reset-btn" id="resetuser">Reset</button>
-                  </div>
+                <div class="effectrow">
+                  <label class="effectlabel">username effect</label>
+                  <select id="usernameeffect" class="effectselect">
+                    <option value="none">none</option>
+                    <option value="rainbow">rainbow</option>
+                    <option value="typing">typing animation</option>
+                    <option value="glow">glow</option>
+                    <option value="gradient">gradient</option>
+                    <option value="pulse">pulse</option>
+                  </select>
+                </div>
+                <div class="effectrow">
+                  <label class="effectlabel">custom text effect</label>
+                  <select id="customtexteffect" class="effectselect">
+                    <option value="none">none</option>
+                    <option value="rainbow">rainbow</option>
+                    <option value="typing">typing animation</option>
+                    <option value="glow">glow</option>
+                    <option value="gradient">gradient</option>
+                    <option value="pulse">pulse</option>
+                  </select>
                 </div>
               </div>
             </div>
 
-            <div class="settings-group">
-              <h3 class="group-title">
+            <div class="settingsgroup">
+              <h3 class="grouptitle">
+                <i class="fas fa-film"></i>
+                card animations
+              </h3>
+              <div class="effectsgrid">
+                <div class="effectrow">
+                  <label class="effectlabel">card entrance</label>
+                  <select id="cardentrance" class="effectselect">
+                    <option value="none">none</option>
+                    <option value="fadein">fade in</option>
+                    <option value="slideup">slide up</option>
+                    <option value="scalein">scale in</option>
+                    <option value="rotatein">rotate in</option>
+                  </select>
+                </div>
+                <div class="effectrow">
+                  <label class="effectlabel">hover effect</label>
+                  <select id="cardhover" class="effectselect">
+                    <option value="none">none</option>
+                    <option value="lift">lift</option>
+                    <option value="tilt">tilt</option>
+                    <option value="glow">glow</option>
+                    <option value="shake">shake</option>
+                  </select>
+                </div>
+                <div class="effectrow">
+                  <label class="effectlabel">album art effect</label>
+                  <select id="albumarteffect" class="effectselect">
+                    <option value="none">none</option>
+                    <option value="spin">spin</option>
+                    <option value="pulse">pulse</option>
+                    <option value="bounce">bounce</option>
+                    <option value="glow">glow</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="settingsgroup">
+              <h3 class="grouptitle">
                 <i class="fas fa-chart-line"></i>
-                Progress Bar Colors
+                progress bar style
               </h3>
-              <div class="color-list">
-                <div class="color-item">
-                  <label>Background</label>
-                  <div class="color-picker-wrap">
-                    <input type="color" id="progressbg" value="#2a2a2a">
-                    <button type="button" class="color-reset-btn" id="resetprogressbg">Reset</button>
+              <div class="effectsgrid">
+                <div class="effectrow">
+                  <label class="effectlabel">progress style</label>
+                  <select id="progressstyle" class="effectselect">
+                    <option value="default">default</option>
+                    <option value="rainbow">rainbow</option>
+                    <option value="pulse">pulse</option>
+                    <option value="wave">wave</option>
+                    <option value="neon">neon</option>
+                    <option value="gradient">gradient</option>
+                  </select>
+                </div>
+                <div class="effectrow">
+                  <label class="effectlabel">bar height</label>
+                  <input type="range" id="progressheight" min="2" max="12" value="6" class="rangeslider">
+                </div>
+                <div class="effectrow">
+                  <label class="effectlabel">border radius</label>
+                  <input type="range" id="progressradius" min="0" max="20" value="3" class="rangeslider">
+                </div>
+              </div>
+            </div>
+
+            <div class="settingsgroup">
+              <h3 class="grouptitle">
+                <i class="fas fa-palette"></i>
+                text colors
+              </h3>
+              <div class="colorlist">
+                <div class="coloritem">
+                  <label>song title</label>
+                  <div class="colorpickerwrap">
+                    <input type="color" id="songcolor" value="#ffffff">
+                    <button type="button" class="colorresetbtn" id="resetsong">reset</button>
                   </div>
                 </div>
-                <div class="color-item">
-                  <label>Fill Start</label>
-                  <div class="color-picker-wrap">
-                    <input type="color" id="progressfill" value="#1DB954">
-                    <button type="button" class="color-reset-btn" id="resetprogressfill">Reset</button>
+                <div class="coloritem">
+                  <label>artist name</label>
+                  <div class="colorpickerwrap">
+                    <input type="color" id="artistcolor" value="#a6a6a6">
+                    <button type="button" class="colorresetbtn" id="resetartist">reset</button>
                   </div>
                 </div>
-                <div class="color-item">
-                  <label>Fill End</label>
-                  <div class="color-picker-wrap">
-                    <input type="color" id="progressend" value="#1ed760">
-                    <button type="button" class="color-reset-btn" id="resetprogressend">Reset</button>
+                <div class="coloritem">
+                  <label>username</label>
+                  <div class="colorpickerwrap">
+                    <input type="color" id="usercolor" value="#a6a6a6">
+                    <button type="button" class="colorresetbtn" id="resetuser">reset</button>
+                  </div>
+                </div>
+                <div class="coloritem">
+                  <label>custom text</label>
+                  <div class="colorpickerwrap">
+                    <input type="color" id="customtextcolor" value="#888888">
+                    <button type="button" class="colorresetbtn" id="resetcustomtext">reset</button>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div class="settings-group">
-              <h3 class="group-title">
-                <i class="fas fa-adjust"></i>
-                Card Theme
+            <div class="settingsgroup">
+              <h3 class="grouptitle">
+                <i class="fas fa-chart-line"></i>
+                progress colors
               </h3>
-              <div class="theme-buttons">
-                <button id="darkmode" class="modern-btn btn-secondary btn-active">
+              <div class="colorlist">
+                <div class="coloritem">
+                  <label>background</label>
+                  <div class="colorpickerwrap">
+                    <input type="color" id="progressbg" value="#2a2a2a">
+                    <button type="button" class="colorresetbtn" id="resetprogressbg">reset</button>
+                  </div>
+                </div>
+                <div class="coloritem">
+                  <label>fill start</label>
+                  <div class="colorpickerwrap">
+                    <input type="color" id="progressfill" value="#1DB954">
+                    <button type="button" class="colorresetbtn" id="resetprogressfill">reset</button>
+                  </div>
+                </div>
+                <div class="coloritem">
+                  <label>fill end</label>
+                  <div class="colorpickerwrap">
+                    <input type="color" id="progressend" value="#1ed760">
+                    <button type="button" class="colorresetbtn" id="resetprogressend">reset</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settingsgroup">
+              <h3 class="grouptitle">
+                <i class="fas fa-adjust"></i>
+                card theme
+              </h3>
+              <div class="themebuttons">
+                <button id="darkmode" class="modernbtn btnsecondary btnactive">
                   <i class="fas fa-moon"></i>
-                  Dark
+                  dark
                 </button>
-                <button id="lightmode" class="modern-btn btn-secondary">
+                <button id="lightmode" class="modernbtn btnsecondary">
                   <i class="fas fa-sun"></i>
-                  Light
+                  light
                 </button>
               </div>
             </div>
@@ -167,25 +309,25 @@
         </section>
       </div>
 
-      <div class="right-column">
-        <section class="preview-panel glass-card">
-          <div class="embed-section">
-            <label class="embed-label">
+      <div class="rightcolumn">
+        <section class="previewpanel glasscard">
+          <div class="embedsection">
+            <label class="embedlabel">
               <i class="fas fa-code"></i>
-              Embed Preview (iframe)
+              live preview
             </label>
-            <div class="embed-container">
-              <iframe id="embedpreview" src="" title="Embed preview"></iframe>
+            <div class="embedcontainer">
+              <iframe id="embedpreview" src="" title="embed preview"></iframe>
             </div>
           </div>
         </section>
       </div>
     </div>
 
-    <section class="credits-section">
-      <h2 class="credits-title">Credits</h2>
-      <div class="api-info-grid" id="creditsinfo">
-        <div class="loading-state">Loading API information...</div>
+    <section class="creditssection">
+      <h2 class="creditstitle">api status</h2>
+      <div class="apiinfogrid" id="creditsinfo">
+        <div class="loadingstate">loading api information...</div>
       </div>
     </section>
   </main>
