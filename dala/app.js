@@ -26,7 +26,6 @@ const resetuserbtn = getid('resetuser');
 const resetprogressbgbtn = getid('resetprogressbg');
 const resetprogressfillbtn = getid('resetprogressfill');
 const resetprogressendbtn = getid('resetprogressend');
-
 let currentuser = null;
 let userdata = null;
 let refreshinterval = null;
@@ -135,6 +134,7 @@ async function fetchuserdata(userid) {
 
 function startrefreshloop(userid) {
   stoprefreshloop();
+  // Refresh data every 15 seconds
   refreshinterval = setInterval(async () => {
     try {
       const newdata = await fetchuserdata(userid);
@@ -184,6 +184,14 @@ function renderplayer() {
   updateembedframe();
 }
 
+function updateembedframe() {
+  const currenturl = embedframe.src;
+  const newurl = currentuser ? buildembed(currentuser) : '';
+  if (currenturl !== newurl) {
+    embedframe.src = newurl;
+  }
+}
+
 function switchtheme(lightmode) {
   islighttheme = lightmode;
   if (lightmode) {
@@ -199,7 +207,11 @@ function switchtheme(lightmode) {
 }
 
 function updateembedframe() {
-  embedframe.src = currentuser ? buildembed(currentuser) : '';
+  const currenturl = embedframe.src;
+  const newurl = currentuser ? buildembed(currentuser) : '';
+  if (currenturl !== newurl) {
+    embedframe.src = newurl;
+  }
 }
 
 loadbtn.addEventListener('click', async () => {
