@@ -1,175 +1,327 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>coming soon</title>
-  <style>
-    :root{
-      --bg:#000;   
-      --fg:#e8e8e8;       
-      --muted:#9a9a9a;  
-      --accent:#fff;      
-      --box:#2a2a2a;    
-      --glow:#ffffff10;  
-    }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; background:var(--bg); color:var(--fg);
-      font:16px/1.6 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      display:grid; place-items:center; overflow:hidden;
-    }
-
-    .crt:before{ 
-      content:""; position:fixed; inset:0; pointer-events:none;
-      background:
-        repeating-linear-gradient(
-          to bottom,
-          #ffffff05 0px,#ffffff05 1px,
-          transparent 2px,transparent 3px
-        );
-      mix-blend-mode:overlay; opacity:.35;
-    }
-    .crt:after{
-      content:""; position:fixed; inset:0; pointer-events:none;
-      background:radial-gradient(1200px 600px at 50% 50%, transparent 50%, #000000cc 100%);
-    }
-
-    .wrap{width:min(900px,92vw);}
-
-    .header{
-      text-transform:lowercase; letter-spacing:.02em; user-select:none;
-      display:flex; align-items:center; gap:18px; margin-bottom:22px; opacity:.95;
-    }
-    .logo{
-      width:56px; height:56px; border:1px dashed var(--box); border-radius:12px;
-      display:grid; place-items:center; box-shadow:0 0 0 6px #ffffff04 inset, 0 0 30px var(--glow) inset;
-    }
-    .logo span{font-weight:700}
-
-    .title{font-size:26px;}
-    .title .cursor{display:inline-block; width:.6ch; height:1.05em; translate:0 .15em; background:var(--accent); animation:blink 1s steps(1,end) infinite;}
-    @keyframes blink{50%{opacity:0}}
-
-    .terminal{
-      border:1px dashed var(--box); border-radius:16px; padding:22px 22px 18px; position:relative;
-      background:linear-gradient(#0a0a0a,#050505);
-      box-shadow: 0 0 0 8px #ffffff06 inset, 0 12px 40px #000000aa;
-      min-height:320px; overflow:auto; scrollbar-width:thin; scrollbar-color:#444 #111;
-    }
-    .terminal::-webkit-scrollbar{height:12px;width:12px}
-    .terminal::-webkit-scrollbar-thumb{background:#3b3b3b}
-    .terminal::-webkit-scrollbar-track{background:#111}
-
-    .led{
-      position:absolute; top:10px; right:12px; display:flex; gap:6px; opacity:.6;
-    }
-    .dot{width:8px;height:8px;border-radius:50%; background:#fff; opacity:.35; box-shadow:0 0 8px #fff7}
-
-    .line{white-space:pre-wrap; word-break:break-word}
-    .muted{color:var(--muted)}
-
-    .prompt{display:flex; gap:10px; align-items:center; margin-top:10px}
-    .path{color:#cfcfcf}
-    .input{flex:1; min-width:0}
-    .input .caret{display:inline-block; width:.6ch; height:1.05em; translate:0 .2em; background:var(--accent); animation:blink .9s steps(1,end) infinite}
-
-    .footer{margin-top:16px; color:var(--muted); font-size:13px; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap}
-    .btn{
-      border:1px solid var(--box); padding:8px 12px; border-radius:999px; text-decoration:none; color:var(--fg);
-      display:inline-flex; align-items:center; gap:8px; transition:transform .08s ease, background .2s ease;
-      background:#0d0d0d; box-shadow:0 0 0 4px #ffffff06 inset;
-    }
-    .btn:active{transform:translateY(1px)}
-    .btn:hover{background:#141414}
-
-    .hidden{display:none}
-
-    @media (max-width:520px){
-      .title{font-size:22px}
-      .terminal{min-height:280px}
-    }
-  </style>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Spotynif — Enhanced Spotify Status Cards</title>
+  <link rel="stylesheet" href="dala/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="icon" href="dala/favicon.svg" />
+  <meta name="description" content="Create stunning, highly customizable Spotify status cards with advanced text effects and animations">
 </head>
-<body class="crt">
-  <main class="wrap">
-    <header class="header">
-      <div class="logo"><span>?</span></div>
-      <div class="title">coming soon<span class="cursor" aria-hidden="true"></span></div>
+<body>
+  
+  <main class="mainwrap">
+    <div class="notifcontainer" id="notificationarea"></div>
+    
+    <header class="mainheader">
+      <div class="headerlogo">
+        <div class="logodot"></div>
+        <h1>spotynif</h1>
+      </div>
+      <p class="headersubtitle">enhanced spotify status cards with advanced customization</p>
     </header>
+    
+    <div class="contentwrapper">
+      <div class="leftcolumn">
+        <section class="controlpanel glasscard">
+          <div class="inputsection">
+            <label class="inputlabel">
+              <i class="fab fa-discord"></i>
+              discord user id
+            </label>
+            <input id="userid" placeholder="e.g. 1170109139989561464" class="moderninput" inputmode="numeric" />
+          </div>
 
-    <section class="terminal" id="term" aria-live="polite" aria-label="loading">
-      <div class="led" aria-hidden="true">
-        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          <div class="buttonrow">
+            <button id="loadbtn" class="modernbtn btnprimary">
+              <i class="fas fa-play"></i>
+              load
+            </button>
+            <button id="clearbtn" class="modernbtn btnsecondary">
+              <i class="fas fa-trash"></i>
+              clear
+            </button>
+            <button id="copyembed" class="modernbtn btnsecondary">
+              <i class="fas fa-copy"></i>
+              copy embed url
+            </button>
+          </div>
+          
+          <div class="inputsection">
+            <label class="inputlabel">
+              <i class="fas fa-comment"></i>
+              custom text (optional)
+            </label>
+            <input id="customtxt" placeholder="your custom message..." class="moderninput" />
+          </div>
+          
+          <div class="infonotice">
+            <i class="fas fa-info-circle"></i>
+            <div>
+              <strong>note:</strong> spotify must be connected to discord with activity status enabled
+            </div>
+          </div>
+        </section>
+
+        <section class="glasscard">
+          <div class="customizationgrid">
+            <div class="settingsgroup">
+              <h3 class="grouptitle">
+                <i class="fas fa-eye"></i>
+                display options
+              </h3>
+              <div class="togglelist">
+                <label class="toggleswitch">
+                  <input id="showartist" type="checkbox" checked />
+                  <span>artist</span>
+                </label>
+                <label class="toggleswitch">
+                  <input id="showprogress" type="checkbox" checked />
+                  <span>progress bar</span>
+                </label>
+                <label class="toggleswitch">
+                  <input id="showalbum" type="checkbox" checked />
+                  <span>album art</span>
+                </label>
+                <label class="toggleswitch">
+                  <input id="showuser" type="checkbox" checked />
+                  <span>username</span>
+                </label>
+                <label class="toggleswitch">
+                  <input id="showduration" type="checkbox" checked />
+                  <span>duration</span>
+                </label>
+                <label class="toggleswitch">
+                  <input id="showstatus" type="checkbox" />
+                  <span>online status</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="settingsgroup">
+              <h3 class="grouptitle">
+                <i class="fas fa-magic"></i>
+                text effects
+              </h3>
+              <div class="effectsgrid">
+                <div class="effectrow">
+                  <label class="effectlabel">song title effect</label>
+                  <select id="songtitleeffect" class="effectselect">
+                    <option value="none">none</option>
+                    <option value="typing">typing animation</option>
+                    <option value="glow">glow</option>
+                    <option value="pulse">pulse</option>
+                    <option value="wave">wave</option>
+                    <option value="flicker">flicker</option>
+                    <option value="fade">fade</option>
+                    <option value="slide">slide</option>
+                  </select>
+                </div>
+                <div class="effectrow">
+                  <label class="effectlabel">artist effect</label>
+                  <select id="artisteffect" class="effectselect">
+                    <option value="none">none</option>
+                    <option value="typing">typing animation</option>
+                    <option value="glow">glow</option>
+                    <option value="pulse">pulse</option>
+                    <option value="wave">wave</option>
+                    <option value="fade">fade</option>
+                    <option value="slide">slide</option>
+                  </select>
+                </div>
+                <div class="effectrow">
+                  <label class="effectlabel">username effect</label>
+                  <select id="usernameeffect" class="effectselect">
+                    <option value="none">none</option>
+                    <option value="typing">typing animation</option>
+                    <option value="glow">glow</option>
+                    <option value="pulse">pulse</option>
+                    <option value="fade">fade</option>
+                  </select>
+                </div>
+                <div class="effectrow">
+                  <label class="effectlabel">custom text effect</label>
+                  <select id="customtexteffect" class="effectselect">
+                    <option value="none">none</option>
+                    <option value="typing">typing animation</option>
+                    <option value="glow">glow</option>
+                    <option value="pulse">pulse</option>
+                    <option value="fade">fade</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="settingsgroup">
+              <h3 class="grouptitle">
+                <i class="fas fa-film"></i>
+                card animations
+              </h3>
+              <div class="effectsgrid">
+                <div class="effectrow">
+                  <label class="effectlabel">card entrance</label>
+                  <select id="cardentrance" class="effectselect">
+                    <option value="none">none</option>
+                    <option value="fadein">fade in</option>
+                    <option value="slideup">slide up</option>
+                    <option value="scalein">scale in</option>
+                    <option value="slideright">slide right</option>
+                  </select>
+                </div>
+                <div class="effectrow">
+                  <label class="effectlabel">hover effect</label>
+                  <select id="cardhover" class="effectselect">
+                    <option value="none">none</option>
+                    <option value="lift">lift</option>
+                    <option value="scale">scale</option>
+                    <option value="shake">shake</option>
+                    <option value="tilt">tilt</option>
+                  </select>
+                </div>
+                <div class="effectrow">
+                  <label class="effectlabel">album art effect</label>
+                  <select id="albumarteffect" class="effectselect">
+                    <option value="none">none</option>
+                    <option value="spin">spin</option>
+                    <option value="pulse">pulse</option>
+                    <option value="bounce">bounce</option>
+                    <option value="shake">shake</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="settingsgroup">
+              <h3 class="grouptitle">
+                <i class="fas fa-chart-line"></i>
+                progress bar style
+              </h3>
+              <div class="effectsgrid">
+                <div class="effectrow">
+                  <label class="effectlabel">progress style</label>
+                  <select id="progressstyle" class="effectselect">
+                    <option value="default">default</option>
+                    <option value="pulse">pulse</option>
+                    <option value="wave">wave</option>
+                    <option value="slide">slide</option>
+                    <option value="minimal">minimal</option>
+                  </select>
+                </div>
+                <div class="effectrow">
+                  <label class="effectlabel">bar height</label>
+                  <input type="range" id="progressheight" min="2" max="12" value="6" class="rangeslider">
+                </div>
+                <div class="effectrow">
+                  <label class="effectlabel">border radius</label>
+                  <input type="range" id="progressradius" min="0" max="20" value="3" class="rangeslider">
+                </div>
+              </div>
+            </div>
+
+            <div class="settingsgroup">
+              <h3 class="grouptitle">
+                <i class="fas fa-palette"></i>
+                text colors
+              </h3>
+              <div class="colorlist">
+                <div class="coloritem">
+                  <label>song title</label>
+                  <div class="colorpickerwrap">
+                    <input type="color" id="songcolor" value="#ffffff">
+                    <button type="button" class="colorresetbtn" id="resetsong">reset</button>
+                  </div>
+                </div>
+                <div class="coloritem">
+                  <label>artist name</label>
+                  <div class="colorpickerwrap">
+                    <input type="color" id="artistcolor" value="#cccccc">
+                    <button type="button" class="colorresetbtn" id="resetartist">reset</button>
+                  </div>
+                </div>
+                <div class="coloritem">
+                  <label>username</label>
+                  <div class="colorpickerwrap">
+                    <input type="color" id="usercolor" value="#999999">
+                    <button type="button" class="colorresetbtn" id="resetuser">reset</button>
+                  </div>
+                </div>
+                <div class="coloritem">
+                  <label>custom text</label>
+                  <div class="colorpickerwrap">
+                    <input type="color" id="customtextcolor" value="#999999">
+                    <button type="button" class="colorresetbtn" id="resetcustomtext">reset</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settingsgroup">
+              <h3 class="grouptitle">
+                <i class="fas fa-chart-line"></i>
+                progress colors
+              </h3>
+              <div class="colorlist">
+                <div class="coloritem">
+                  <label>background</label>
+                  <div class="colorpickerwrap">
+                    <input type="color" id="progressbg" value="#333333">
+                    <button type="button" class="colorresetbtn" id="resetprogressbg">reset</button>
+                  </div>
+                </div>
+                <div class="coloritem">
+                  <label>fill color</label>
+                  <div class="colorpickerwrap">
+                    <input type="color" id="progressfill" value="#ffffff">
+                    <button type="button" class="colorresetbtn" id="resetprogressfill">reset</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settingsgroup">
+              <h3 class="grouptitle">
+                <i class="fas fa-adjust"></i>
+                card theme
+              </h3>
+              <div class="themebuttons">
+                <button id="darkmode" class="modernbtn btnsecondary btnactive">
+                  <i class="fas fa-moon"></i>
+                  dark
+                </button>
+                <button id="lightmode" class="modernbtn btnsecondary">
+                  <i class="fas fa-sun"></i>
+                  light
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
-      <div class="line muted"># spotynif / tools</div>
-      <div class="line">$ whoami → <span class="muted">spotynif guest</span></div>
-      <div class="line">$ cat</div>
-      <div class="line" id="output"></div>
 
-      <div class="prompt" id="prompt">
-        <span class="path">$</span>
-        <span class="input" id="typed"></span><span class="caret" aria-hidden="true"></span>
-      </div>
-    </section>
-
-    <div class="footer">
-      <div>© <span id="year"></span> — <span class="muted">loading • version 0.1</span></div>
-      <div>
-        <a class="btn" href="#" id="copy" title="Copiază adresa">copy e‑mail</a>
+      <div class="rightcolumn">
+        <section class="previewpanel glasscard">
+          <div class="embedsection">
+            <label class="embedlabel">
+              <i class="fas fa-code"></i>
+              live preview
+            </label>
+            <div class="embedcontainer">
+              <iframe id="embedpreview" src="" title="embed preview"></iframe>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
+
+    <section class="creditssection">
+      <h2 class="creditstitle">api status</h2>
+      <div class="apiinfogrid" id="creditsinfo">
+        <div class="loadingstate">loading api information...</div>
+      </div>
+    </section>
   </main>
-
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-    const lines = [
-      'loading...',
-      'new interface...',
-      'stay here...\n',
-    ];
-
-    const out = document.getElementById('output');
-    const typedPrompt = document.getElementById('typed');
-    let li = 0, ci = 0, typing = true;
-
-    function typeNext(){
-      if(li >= lines.length){ typing = false; showFakePrompt(); return; }
-      const current = lines[li];
-      if(ci <= current.length){
-        out.textContent += current.charAt(ci++);
-        requestAnimationFrame(()=>setTimeout(typeNext, 18));
-      }else{ out.innerHTML += '<br/>'; li++; ci = 0; setTimeout(typeNext, 300); }
-    }
-    typeNext();
-    const demo = 'subscribe --notify email';
-    let pi = 0;
-    function showFakePrompt(){
-      const interval = setInterval(()=>{
-        if(pi < demo.length){
-          typedPrompt.textContent += demo.charAt(pi++);
-        }else{
-          clearInterval(interval);
-          const note = document.createElement('div');
-          note.className = 'line muted';
-          note.textContent = 'hint: copy email below to subscribe';
-          document.getElementById('term').appendChild(note);
-        }
-      }, 55);
-    }
-
-    document.getElementById('copy').addEventListener('click', function(e){
-      e.preventDefault();
-      const email = 'contacts@lastanswtcf.xyz';
-      navigator.clipboard.writeText(email).then(()=>{
-        this.textContent = 'copy ✔';
-        setTimeout(()=> this.textContent = 'copie e‑mail', 1800);
-      }).catch(()=>{
-        prompt('copy email:', email);
-      })
-    });
-  </script>
+  
+  <script type="module" src="dala/app.js"></script>
 </body>
 </html>
