@@ -28,13 +28,10 @@ const resetprogressfillbtn = getid('resetprogressfill');
 const resetprogressendbtn = getid('resetprogressend');
 
 let currentuser = null;
-let websocket = null;
-let heartbeatloop = null;
+let pollingInterval = null;
 let userdata = null;
 let animframe = null;
 let islighttheme = false;
-let reconnectAttempts = 0;
-const maxReconnectAttempts = 5;
 
 const defaultdarkcolors = {
   song: '#ffffff',
@@ -139,82 +136,42 @@ async function fetchuserdata(userid) {
 
 function startwebsocket(userid) {
   closesocket();
-  reconnectAttempts = 0;
-  connectWithRetry(userid);
+  startpolling(userid);
 }
 
-function connectWithRetry(userid) {
-  if (reconnectAttempts >= maxReconnectAttempts) {
-    console.log('Max reconnection attempts reached');
-    shownotif('WebSocket connection failed after multiple attempts', 'error');
-    return;
+function startpolling(userid) {
+  // Use HTTP polling instead of WebSocket since Lanyard doesn't support direct user WebSocket connections
+  if (heartbeatloop) {
+    clearInterval(heartbeatloop);
   }
-
-  try {
-    websocket = new WebSocket(`wss://api.lanyard.rest/v1/users/${userid}`);
-    
-    websocket.addEventListener('open', () => {
-      console.log('WebSocket connected successfully');
-      reconnectAttempts = 0;
-    });
-    
-    websocket.addEventListener('message', (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        const { op, d, t } = message;
-        
-        if (op === 1 && d?.heartbeat_interval) {
-          websocket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: userid } }));
-          heartbeatloop = setInterval(() => {
-            if (websocket && websocket.readyState === WebSocket.OPEN) {
-              websocket.send(JSON.stringify({ op: 3 }));
-            }
-          }, d.heartbeat_interval);
-        } else if (op === 0) {
-          userdata = t === 'INIT_STATE' ? d[userid] ?? d : d;
-          renderplayer();
-        }
-      } catch (error) {
-        console.error('WebSocket message error:', error);
-      }
-    });
-    
-    websocket.addEventListener('error', (error) => {
-      console.warn('WebSocket error occurred');
-    });
-    
-    websocket.addEventListener('close', (event) => {
-      console.log('WebSocket closed with code:', event.code);
-      if (heartbeatloop) {
-        clearInterval(heartbeatloop);
-        heartbeatloop = null;
-      }
-      
-      if (event.code !== 1000 && currentuser && reconnectAttempts < maxReconnectAttempts) {
-        reconnectAttempts++;
-        console.log(`Attempting reconnection ${reconnectAttempts}/${maxReconnectAttempts}`);
-        setTimeout(() => connectWithRetry(userid), 3000 * reconnectAttempts);
-      }
-    });
-  } catch (error) {
-    console.error('Failed to create WebSocket connection:', error);
-    reconnectAttempts++;
-    if (reconnectAttempts < maxReconnectAttempts) {
-      setTimeout(() => connectWithRetry(userid), 3000 * reconnectAttempts);
+  
+  // Initial fetch
+  fetchuserdata(userid).then(data => {
+    if (data) {
+      userdata = data;
+      renderplayer();
     }
-  }
+  });
+  
+  // Poll every 15 seconds for updates
+  heartbeatloop = setInterval(async () => {
+    try {
+      const data = await fetchuserdata(userid);
+      if (data) {
+        userdata = data;
+        renderplayer();
+      }
+    } catch (error) {
+      console.warn('Polling update failed:', error);
+    }
+  }, 15000);
 }
 
 function closesocket() {
-  if (heartbeatloop) {
-    clearInterval(heartbeatloop);
-    heartbeatloop = null;
+  if (pollingInterval) {
+    clearInterval(pollingInterval);
+    pollingInterval = null;
   }
-  if (websocket) {
-    websocket.close(1000);
-    websocket = null;
-  }
-  reconnectAttempts = 0;
 }
 
 function formattime(milliseconds) {
@@ -279,7 +236,7 @@ loadbtn.addEventListener('click', async () => {
     userdata = await fetchuserdata(userid);
     renderplayer();
     startwebsocket(userid);
-    shownotif('Discord data loaded successfully!', 'success');
+    shownotif('Discord data loaded successfully! Updates every 15 seconds.', 'success');
   } catch (error) {
     console.error('loading error:', error);
     shownotif('Failed to load Discord data. Please check the ID and try again.', 'error');
