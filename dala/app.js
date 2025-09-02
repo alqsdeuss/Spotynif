@@ -141,7 +141,7 @@ function startrefreshloop(userid) {
       const newdata = await fetchuserdata(userid);
       if (newdata) {
         userdata = newdata;
-        renderplayer();
+        updateembedframe();
       }
     } catch (error) {
       console.error('refresh error:', error);
@@ -154,35 +154,6 @@ function stoprefreshloop() {
     clearInterval(refreshinterval);
     refreshinterval = null;
   }
-}
-
-function formattime(milliseconds) {
-  if (!milliseconds) return '0:00';
-  const totalseconds = Math.floor(milliseconds / 1000);
-  const minutes = Math.floor(totalseconds / 60);
-  const seconds = String(totalseconds % 60).padStart(2, '0');
-  return `${minutes}:${seconds}`;
-}
-
-function calculateprogress(spotifydata) {
-  if (!spotifydata?.timestamps) return null;
-  const starttime = spotifydata.timestamps.start;
-  const endtime = spotifydata.timestamps.end;
-  if (!starttime || !endtime) return null;
-  
-  const totalduration = endtime - starttime;
-  const currentelapsed = Date.now() - starttime;
-  const progresspercent = Math.min(1, Math.max(0, currentelapsed / totalduration));
-  
-  return { 
-    elapsed: currentelapsed, 
-    duration: totalduration, 
-    percent: progresspercent 
-  };
-}
-
-function renderplayer() {
-  updateembedframe();
 }
 
 function updateembedframe() {
@@ -206,17 +177,7 @@ function switchtheme(lightmode) {
   }
   
   resetallcolors();
-  renderplayer();
-}
-
-function updateembedframe() {
-  const currenturl = embedframe.src;
-  const newurl = currentuser ? buildembed(currentuser) : '';
-  
-  // Only update if URL actually changed to prevent unnecessary reloads
-  if (currenturl !== newurl) {
-    embedframe.src = newurl;
-  }
+  updateembedframe();
 }
 
 loadbtn.addEventListener('click', async () => {
@@ -232,7 +193,7 @@ loadbtn.addEventListener('click', async () => {
   try {
     currentuser = userid;
     userdata = await fetchuserdata(userid);
-    renderplayer();
+    updateembedframe();
     startrefreshloop(userid);
     shownotif('Discord data loaded successfully! (Updates every 15 seconds)', 'success');
   } catch (error) {
@@ -249,7 +210,7 @@ clearbtn.addEventListener('click', () => {
   customtxtbox.value = '';
   currentuser = null;
   userdata = null;
-  renderplayer();
+  updateembedframe();
   stoprefreshloop();
 });
 
@@ -271,50 +232,50 @@ copyembedurl.addEventListener('click', async () => {
 });
 
 [customtxtbox, showartistbox, showprogressbox, showalbumbox, showuserbox].forEach((element) => {
-  element.addEventListener('input', renderplayer);
+  element.addEventListener('input', updateembedframe);
 });
 
 [songcolorpicker, artistcolorpicker, usercolorpicker, progressbgcolorpicker, progressfillcolorpicker, progressendcolorpicker].forEach(colorinput => {
   colorinput.addEventListener('input', () => {
     updatecolors();
-    renderplayer();
+    updateembedframe();
   });
 });
 
 resetsongbtn.addEventListener('click', () => {
   songcolorpicker.value = getdefaultcolor('song');
   updatecolors();
-  renderplayer();
+  updateembedframe();
 });
 
 resetartistbtn.addEventListener('click', () => {
   artistcolorpicker.value = getdefaultcolor('artist');
   updatecolors();
-  renderplayer();
+  updateembedframe();
 });
 
 resetuserbtn.addEventListener('click', () => {
   usercolorpicker.value = getdefaultcolor('username');
   updatecolors();
-  renderplayer();
+  updateembedframe();
 });
 
 resetprogressbgbtn.addEventListener('click', () => {
   progressbgcolorpicker.value = getdefaultcolor('progressbg');
   updatecolors();
-  renderplayer();
+  updateembedframe();
 });
 
 resetprogressfillbtn.addEventListener('click', () => {
   progressfillcolorpicker.value = getdefaultcolor('progressfill');
   updatecolors();
-  renderplayer();
+  updateembedframe();
 });
 
 resetprogressendbtn.addEventListener('click', () => {
   progressendcolorpicker.value = getdefaultcolor('progressend');
   updatecolors();
-  renderplayer();
+  updateembedframe();
 });
 
 darkmodebutton.addEventListener('click', () => switchtheme(false));
@@ -378,5 +339,5 @@ async function loadcreditsinfo() {
 }
 
 resetallcolors();
-renderplayer();
+updateembedframe();
 loadcreditsinfo();
