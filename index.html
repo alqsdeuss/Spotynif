@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Spotify Status Card — Lanyard (static)</title>
+  <link rel="stylesheet" href="dala/styles.css">
+  <link rel="icon" href="dala/favicon.svg" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="header">
+      <h1>Spotify Status Card</h1>
+      <p class="muted">Live card din Discord (Lanyard) — alb & negru, modern, embed-ready.</p>
+    </header>
+
+    <section class="controls card">
+      <label class="field">
+        <span>Discord User ID</span>
+        <input id="inputId" placeholder="ex: 123456789012345678" inputmode="numeric" />
+      </label>
+      <div class="buttons">
+        <button id="btnLoad" class="btn primary">Load</button>
+        <button id="btnClear" class="btn">Clear</button>
+        <button id="btnCopyEmbed" class="btn" title="Copy embed URL">Copy embed URL</button>
+      </div>
+
+      <div class="small muted note">Pentru a afișa Spotify, userul trebuie să aibă cont Spotify conectat la Discord și Activity Status activ.</div>
+    </section>
+
+    <section class="preview card" id="previewWrap">
+      <!-- Player card injected by JS -->
+      <div id="playerContainer"></div>
+
+      <div class="edit-row" id="editRow">
+        <div class="toggles">
+          <label class="switch"><input id="optArtist" type="checkbox" checked /><span>Artist</span></label>
+          <label class="switch"><input id="optProgress" type="checkbox" checked /><span>Progress</span></label>
+          <label class="switch"><input id="optAlbum" type="checkbox" checked /><span>Album art</span></label>
+          <label class="switch"><input id="optUsername" type="checkbox" checked /><span>Username</span></label>
+        </div>
+
+        <div class="theme">
+          <button id="themeDark" class="btn small active">Dark</button>
+          <button id="themeLight" class="btn small">Light</button>
+        </div>
+      </div>
+
+      <div class="embed-preview">
+        <label>Embed preview (iframe)</label>
+        <div class="iframe-sample">
+          <iframe id="iframePreview" src="" width="360" height="120" title="Embed preview"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <footer class="muted small center">Clone & deploy — folosește ID Discord. Built with ❤️ și puțină magie Lanyard.</footer>
+  </main>
+
+  <script type="module" src="dala/app.js"></script>
+</body>
+</html>
