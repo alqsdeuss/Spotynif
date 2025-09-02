@@ -135,7 +135,6 @@ async function fetchuserdata(userid) {
 
 function startrefreshloop(userid) {
   stoprefreshloop();
-  // Refresh data every 15 seconds
   refreshinterval = setInterval(async () => {
     try {
       const newdata = await fetchuserdata(userid);
@@ -146,7 +145,7 @@ function startrefreshloop(userid) {
     } catch (error) {
       console.error('refresh error:', error);
     }
-  }, 15000);
+  }, 9000);
 }
 
 function stoprefreshloop() {
@@ -159,8 +158,6 @@ function stoprefreshloop() {
 function updateembedframe() {
   const currenturl = embedframe.src;
   const newurl = currentuser ? buildembed(currentuser) : '';
-  
-  // Only update if URL actually changed to prevent unnecessary reloads
   if (currenturl !== newurl) {
     embedframe.src = newurl;
   }
