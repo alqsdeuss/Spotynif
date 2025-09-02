@@ -3,8 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Embed — Spotify Status Card</title>
+  <title>Embed Card — Spotynif Tool</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="dala/favicon.svg" />
+  <meta name="description" content="Spotify Card by Spotynif Tool">
   <style>
     html, body, #embedroot {
       height: 100%;
@@ -39,7 +41,6 @@
       const showusername = urlparams.get('showUsername') !== 'false';
       const cardtheme = urlparams.get('theme') === 'light' ? 'light' : 'dark';
       const customtxt = urlparams.get('custom') || '';
-      
       const customsongcolor = urlparams.get('songColor') || '';
       const customartistcolor = urlparams.get('artistColor') || '';
       const customusernamecolor = urlparams.get('usernameColor') || '';
@@ -58,7 +59,6 @@
       if (customprogressbgcolor) documentroot.style.setProperty('--progress-bg-color', customprogressbgcolor);
       if (customprogressfillcolor) documentroot.style.setProperty('--progress-fill-color', customprogressfillcolor);
       if (customprogressendcolor) documentroot.style.setProperty('--progress-fill-end-color', customprogressendcolor);
-
       const rootcontainer = document.getElementById('embedroot');
 
       if (!discordid) {
@@ -98,7 +98,6 @@
 
       function drawplayer() {
         if (frameanimation) cancelAnimationFrame(frameanimation);
-        
         if (!presencedata) {
           rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">No data</div><div class="artist">Connecting...</div></div></div>';
           return;
@@ -106,9 +105,7 @@
 
         const spotifyinfo = presencedata.spotify ?? null;
         const discorduser = presencedata.discord_user?.username ?? null;
-        
         rootcontainer.innerHTML = '';
-        
         const playercard = document.createElement('div');
         playercard.className = 'player';
         
@@ -122,7 +119,6 @@
         
         const trackinfo = document.createElement('div');
         trackinfo.className = 'meta';
-        
         const tracktitle = document.createElement('div');
         tracktitle.className = 'song';
         tracktitle.textContent = spotifyinfo?.song ?? '— Not listening';
@@ -164,7 +160,6 @@
           const progressfill = document.createElement('div');
           progressfill.className = 'progress-fill';
           progressbar.appendChild(progressfill);
-          
           trackinfo.appendChild(timedisplay);
           trackinfo.appendChild(progressbar);
 
@@ -207,7 +202,6 @@
         }
         
         connection = new WebSocket('wss://api.lanyard.rest/socket');
-        
         connection.addEventListener('open', () => {
           console.log('websocket connected');
         });
