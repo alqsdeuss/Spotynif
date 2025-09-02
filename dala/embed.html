@@ -201,7 +201,7 @@
           connection.close();
         }
         
-        connection = new WebSocket('wss://api.lanyard.rest/socket');
+        connection = new WebSocket('https://lanyard.cnrad.dev/');
         connection.addEventListener('open', () => {
           console.log('websocket connected');
         });
