@@ -307,7 +307,7 @@ function updateembedframe() {
 loadbtn.addEventListener('click', async () => {
   const userid = useridbox.value.trim();
   if (!userid) {
-    alert('Please enter a valid Discord ID');
+    shownotification('Please enter a valid Discord ID', 'error');
     return;
   }
   
@@ -319,9 +319,10 @@ loadbtn.addEventListener('click', async () => {
     userdata = await fetchuserdata(userid);
     renderplayer();
     startwebsocket(userid);
+    shownotification('Discord data loaded successfully!', 'success');
   } catch (error) {
     console.error('loading error:', error);
-    alert('Failed to load Discord data. Please check the ID and try again.');
+    shownotification('Failed to load Discord data. Please check the ID and try again.', 'error');
   } finally {
     loadbtn.textContent = 'Load';
     loadbtn.disabled = false;
@@ -339,7 +340,7 @@ clearbtn.addEventListener('click', () => {
 
 copyembedurl.addEventListener('click', async () => {
   if (!currentuser) {
-    alert('Load a Discord ID first');
+    shownotification('Load a Discord ID first', 'error');
     return;
   }
   
@@ -347,19 +348,10 @@ copyembedurl.addEventListener('click', async () => {
   
   try {
     await navigator.clipboard.writeText(embedurl);
-    const originaltext = copyembedurl.textContent;
-    copyembedurl.textContent = 'Copied! ✓';
-    copyembedurl.style.background = 'var(--accent-green)';
-    copyembedurl.style.color = '#000';
-    
-    setTimeout(() => {
-      copyembedurl.textContent = originaltext;
-      copyembedurl.style.background = '';
-      copyembedurl.style.color = '';
-    }, 2000);
+    shownotification('Embed URL copied to clipboard!', 'success');
   } catch (error) {
     console.error('clipboard error:', error);
-    alert('Failed to copy to clipboard');
+    shownotification('Failed to copy to clipboard', 'error');
   }
 });
 
