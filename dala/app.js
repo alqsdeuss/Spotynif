@@ -26,6 +26,7 @@ const resetuserbtn = getid('resetuser');
 const resetprogressbgbtn = getid('resetprogressbg');
 const resetprogressfillbtn = getid('resetprogressfill');
 const resetprogressendbtn = getid('resetprogressend');
+
 let currentuser = null;
 let userdata = null;
 let refreshinterval = null;
@@ -187,6 +188,8 @@ function renderplayer() {
 function updateembedframe() {
   const currenturl = embedframe.src;
   const newurl = currentuser ? buildembed(currentuser) : '';
+  
+  // Only update if URL actually changed to prevent unnecessary reloads
   if (currenturl !== newurl) {
     embedframe.src = newurl;
   }
@@ -209,6 +212,8 @@ function switchtheme(lightmode) {
 function updateembedframe() {
   const currenturl = embedframe.src;
   const newurl = currentuser ? buildembed(currentuser) : '';
+  
+  // Only update if URL actually changed to prevent unnecessary reloads
   if (currenturl !== newurl) {
     embedframe.src = newurl;
   }
