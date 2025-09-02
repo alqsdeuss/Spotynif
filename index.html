@@ -1,4 +1,69 @@
-<!doctype html>
+<div class="edit-row">
+        <div class="control-section">
+          <h3>Display Options</h3>
+          <div class="toggles">
+            <label class="switch">
+              <input id="optArtist" type="checkbox" checked />
+              <span>Artist</span>
+            </label>
+            <label class="switch">
+              <input id="optProgress" type="checkbox" checked />
+              <span>Progress</span>
+            </label>
+            <label class="switch">
+              <input id="optAlbum" type="checkbox" checked />
+              <span>Album Art</span>
+            </label>
+            <label class="switch">
+              <input id="optUsername" type="checkbox" checked />
+              <span>Username</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <h3>Custom Colors</h3>
+          <div class="color-controls">
+            <div class="color-field">
+              <label>Song Title</label>
+              <div class="color-input-wrapper">
+                <input type="color" id="colorSong" value="#e8e8e8">
+                <button type="button" class="color-reset" id="resetSong">Reset</button>
+              </div>
+            </div>
+            <div class="color-field">
+              <label>Artist Name</label>
+              <div class="color-input-wrapper">
+                <input type="color" id="colorArtist" value="#888888">
+                <button type="button" class="color-reset" id="resetArtist">Reset</button>
+              </div>
+            </div>
+            <div class="color-field">
+              <label>Username</label>
+              <div class="color-input-wrapper">
+                <input type="color" id="colorUsername" value="#888888">
+                <button type="button" class="color-reset" id="resetUsername">Reset</button>
+              </div>
+            </div>
+            <div class="color-field">
+              <label>Progress Bar</label>
+              <div class="color-input-wrapper">
+                <input type="color" id="colorProgress" value="#00d474">
+                <button type="button" class="color-reset" id="resetProgress">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <h3>Card Theme</h3>
+          <div class="theme">
+            <button id="themeDark" class="btn small active">Dark</button>
+            <button id="themeLight" class="btn small">Light</button>
+          </div>
+        </div>
+      </div>
+              <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
