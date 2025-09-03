@@ -16,85 +16,21 @@
     
     body {
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 8px;
       background: transparent;
       font-family: 'NotoSansMono', 'Noto Sans Mono', monospace;
-      gap: 16px;
     }
     
     #embedroot {
       width: 100%;
       max-width: 420px;
     }
-
-    .apilink {
-      text-align: center;
-      margin-top: 12px;
-    }
-
-    .apilink a {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      background: var(--bg-tertiary, #222);
-      border: 1px solid var(--border-subtle, #333);
-      border-radius: 6px;
-      color: var(--text-secondary, #ccc);
-      text-decoration: none;
-      font-size: 11px;
-      font-weight: 500;
-      transition: all 0.2s ease;
-      font-family: inherit;
-    }
-
-    .cardlight .apilink a {
-      background: #f5f5f5;
-      border-color: #ddd;
-      color: #666;
-    }
-
-    .apilink a:hover {
-      border-color: var(--text-primary, #fff);
-      color: var(--text-primary, #fff);
-      transform: translateY(-1px);
-    }
-
-    .cardlight .apilink a:hover {
-      border-color: #333;
-      color: #333;
-    }
-
-    .copynotif {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: var(--bg-card, #111);
-      border: 1px solid #22c55e;
-      border-radius: 6px;
-      padding: 8px 12px;
-      color: #22c55e;
-      font-size: 11px;
-      font-weight: 500;
-      opacity: 0;
-      transform: translateX(100%);
-      transition: all 0.3s ease;
-      z-index: 1000;
-      pointer-events: none;
-    }
-
-    .copynotif.show {
-      opacity: 1;
-      transform: translateX(0);
-    }
   </style>
 </head>
 <body>
   <div id="embedroot"></div>
-  <div class="copynotif" id="copynotif">API URL copied!</div>
 
   <script>
     (function() {
@@ -294,18 +230,6 @@
 
         playercard.appendChild(trackinfo);
         rootcontainer.appendChild(playercard);
-
-        // Add API link below the card
-        const apilink = document.createElement('div');
-        apilink.className = 'apilink';
-        const apiurl = `${location.origin}/api?id=${encodeURIComponent(discordid)}`;
-        apilink.innerHTML = `
-          <a href="#" onclick="copyapiurl('${apiurl}'); return false;">
-            <span>📋</span>
-            copy api url
-          </a>
-        `;
-        rootcontainer.appendChild(apilink);
       }
 
       function updateplayer() {
@@ -445,18 +369,6 @@
           refreshinterval = null;
         }
       }
-
-      window.copyapiurl = function(url) {
-        navigator.clipboard.writeText(url).then(() => {
-          const notif = document.getElementById('copynotif');
-          notif.classList.add('show');
-          setTimeout(() => {
-            notif.classList.remove('show');
-          }, 2000);
-        }).catch(err => {
-          console.error('copy failed:', err);
-        });
-      };
 
       startrefreshloop();
       window.addEventListener('beforeunload', () => {
