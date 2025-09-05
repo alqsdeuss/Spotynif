@@ -44,14 +44,12 @@
       const showstatus = urlparams.get('showStatus') === 'true';
       const cardtheme = urlparams.get('theme') === 'light' ? 'light' : 'dark';
       const customtxt = urlparams.get('custom') || '';
-      
       const customsongcolor = urlparams.get('songColor') || '';
       const customartistcolor = urlparams.get('artistColor') || '';
       const customusernamecolor = urlparams.get('usernameColor') || '';
       const customtextcolor = urlparams.get('customTextColor') || '';
       const customprogressbgcolor = urlparams.get('progressBgColor') || '';
       const customprogressfillcolor = urlparams.get('progressFillColor') || '';
-      
       const songeffect = urlparams.get('songEffect') || 'none';
       const artisteffect = urlparams.get('artistEffect') || 'none';
       const usernameeffect = urlparams.get('usernameEffect') || 'none';
@@ -76,7 +74,6 @@
       if (customprogressfillcolor) documentroot.style.setProperty('--progress-fill-color', customprogressfillcolor);
       documentroot.style.setProperty('--progress-height', progressheight + 'px');
       documentroot.style.setProperty('--progress-radius', progressradius + 'px');
-      
       const rootcontainer = document.getElementById('embedroot');
 
       if (!discordid) {
@@ -101,13 +98,11 @@
       let frameanimation = null;
       let websocket = null;
       let reconnecttimeout = null;
-
       function getprogress(spotifydata) {
         if (!spotifydata || !spotifydata.timestamps) return null;
         const starttime = spotifydata.timestamps.start;
         const endtime = spotifydata.timestamps.end;
         if (!starttime || !endtime) return null;
-        
         const totaldur = endtime - starttime;
         const currentelapsed = Date.now() - starttime;
         const progresspct = Math.max(0, Math.min(1, currentelapsed / totaldur));
@@ -431,7 +426,6 @@
       }
 
       connectwebsocket();
-
       window.addEventListener('beforeunload', () => {
         closewebsocket();
         if (frameanimation) cancelAnimationFrame(frameanimation);
