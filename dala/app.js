@@ -151,7 +151,6 @@ function connectwebsocket(userid) {
   }
   
   websocket = new WebSocket('wss://api.lanyard.rest/socket');
-  
   websocket.onopen = () => {
     const initpayload = {
       op: 2,
@@ -259,7 +258,7 @@ loadbtn.addEventListener('click', async () => {
     shownotif('connected to real-time updates!', 'success');
   } catch (error) {
     console.error('loading error:', error);
-    shownotif('failed to connect.', 'error');
+    shownotif('failed to connect. check the id and try again.', 'error');
   } finally {
     loadbtn.textContent = 'load';
     loadbtn.disabled = false;
@@ -359,6 +358,7 @@ lightmodebutton.addEventListener('click', () => switchtheme(true));
 
 window.addEventListener('beforeunload', () => {
   closewebsocket();
+  closecreditswebsockets();
 });
 
 async function loadcreditsinfo() {
@@ -368,12 +368,15 @@ async function loadcreditsinfo() {
     const promises = userids.map(id => fetch(`https://api.lanyard.rest/v1/users/${id}`).then(r => r.json()).then(d => d.success ? d.data : null));
     const results = await Promise.all(promises);
     creditscontainer.innerHTML = '';
+    
     results.forEach((data, index) => {
       const apicard = document.createElement('div');
       apicard.className = 'apicard';
+      
       if (data) {
         const user = data.discord_user;
         const spotify = data.spotify;
+        
         apicard.innerHTML = `
           <div class="apiheader">
             <img class="apiavatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="${user.username}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
