@@ -1,6 +1,5 @@
 const getid = (id) => document.getElementById(id);
 const findel = (sel) => document.querySelector(sel);
-
 const useridbox = getid('userid');
 const customtxtbox = getid('customtxt');
 const loadbtn = getid('loadbtn');
@@ -9,31 +8,26 @@ const copyembedurl = getid('copyembed');
 const embedframe = getid('embedpreview');
 const notifcontainer = getid('notificationarea');
 const creditscontainer = getid('creditsinfo');
-
 const showartistbox = getid('showartist');
 const showprogressbox = getid('showprogress');
 const showalbumbox = getid('showalbum');
 const showuserbox = getid('showuser');
 const showdurationbox = getid('showduration');
 const showstatusbox = getid('showstatus');
-
 const darkmodebutton = getid('darkmode');
 const lightmodebutton = getid('lightmode');
-
 const songcolorpicker = getid('songcolor');
 const artistcolorpicker = getid('artistcolor');
 const usercolorpicker = getid('usercolor');
 const customtextcolorpicker = getid('customtextcolor');
 const progressbgcolorpicker = getid('progressbg');
 const progressfillcolorpicker = getid('progressfill');
-
 const resetsongbtn = getid('resetsong');
 const resetartistbtn = getid('resetartist');
 const resetuserbtn = getid('resetuser');
 const resetcustomtextbtn = getid('resetcustomtext');
 const resetprogressbgbtn = getid('resetprogressbg');
 const resetprogressfillbtn = getid('resetprogressfill');
-
 const songtitleeffectsel = getid('songtitleeffect');
 const artisteffectsel = getid('artisteffect');
 const usernameeffectsel = getid('usernameeffect');
@@ -44,13 +38,11 @@ const albumarteffectsel = getid('albumarteffect');
 const progressstylesel = getid('progressstyle');
 const progressheightslider = getid('progressheight');
 const progressradiusslider = getid('progressradius');
-
 let currentuser = null;
 let userdata = null;
 let websocket = null;
 let reconnecttimeout = null;
 let islighttheme = false;
-
 const defaultdarkcolors = {
   song: '#ffffff',
   artist: '#cccccc',
@@ -59,7 +51,6 @@ const defaultdarkcolors = {
   progressbg: '#333333',
   progressfill: '#ffffff'
 };
-
 const defaultlightcolors = {
   song: '#000000',
   artist: '#333333',
@@ -72,7 +63,6 @@ const defaultlightcolors = {
 function shownotif(message, type = 'info') {
   const notif = document.createElement('div');
   notif.className = `notification ${type}`;
-  
   const icon = document.createElement('i');
   if (type === 'success') {
     icon.className = 'fas fa-check-circle';
@@ -87,9 +77,7 @@ function shownotif(message, type = 'info') {
   notif.appendChild(icon);
   notif.appendChild(text);
   notifcontainer.appendChild(notif);
-  
   setTimeout(() => notif.classList.add('show'), 100);
-  
   setTimeout(() => {
     notif.classList.remove('show');
     setTimeout(() => {
@@ -110,14 +98,12 @@ function buildembed(userid) {
     showStatus: String(showstatusbox.checked),
     theme: islighttheme ? 'light' : 'dark',
     custom: customtxtbox.value || '',
-    
     songColor: songcolorpicker.value !== getdefaultcolor('song') ? songcolorpicker.value : '',
     artistColor: artistcolorpicker.value !== getdefaultcolor('artist') ? artistcolorpicker.value : '',
     usernameColor: usercolorpicker.value !== getdefaultcolor('username') ? usercolorpicker.value : '',
     customTextColor: customtextcolorpicker.value !== getdefaultcolor('customtext') ? customtextcolorpicker.value : '',
     progressBgColor: progressbgcolorpicker.value !== getdefaultcolor('progressbg') ? progressbgcolorpicker.value : '',
     progressFillColor: progressfillcolorpicker.value !== getdefaultcolor('progressfill') ? progressfillcolorpicker.value : '',
-    
     songEffect: songtitleeffectsel.value,
     artistEffect: artisteffectsel.value,
     usernameEffect: usernameeffectsel.value,
@@ -273,7 +259,7 @@ loadbtn.addEventListener('click', async () => {
     shownotif('connected to real-time updates!', 'success');
   } catch (error) {
     console.error('loading error:', error);
-    shownotif('failed to connect. check the id and try again.', 'error');
+    shownotif('failed to connect.', 'error');
   } finally {
     loadbtn.textContent = 'load';
     loadbtn.disabled = false;
@@ -382,15 +368,12 @@ async function loadcreditsinfo() {
     const promises = userids.map(id => fetch(`https://api.lanyard.rest/v1/users/${id}`).then(r => r.json()).then(d => d.success ? d.data : null));
     const results = await Promise.all(promises);
     creditscontainer.innerHTML = '';
-    
     results.forEach((data, index) => {
       const apicard = document.createElement('div');
       apicard.className = 'apicard';
-      
       if (data) {
         const user = data.discord_user;
         const spotify = data.spotify;
-        
         apicard.innerHTML = `
           <div class="apiheader">
             <img class="apiavatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="${user.username}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
@@ -432,7 +415,6 @@ function initapp() {
   resetallcolors();
   updateembedframe();
   loadcreditsinfo();
-  
   progressheightslider.value = 6;
   progressradiusslider.value = 3;
   updatecolors();
