@@ -198,14 +198,13 @@
       setTimeout(() => {
         errorCard.style.animation = 'fadeIn 0.8s ease-out';
       }, 100);
+      
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' || e.key === ' ') {
-          const homeBtn = document.querySelector('.error-btn-primary');
+          const homeBtn = document.querySelector('.modernbtn');
           if (homeBtn) {
             homeBtn.click();
           }
-        } else if (e.key === 'Escape') {
-          window.history.back();
         }
       });
     });
