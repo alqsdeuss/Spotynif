@@ -47,7 +47,8 @@ const progressradiusslider = getid('progressradius');
 
 let currentuser = null;
 let userdata = null;
-let refreshinterval = null;
+let websocket = null;
+let reconnecttimeout = null;
 let islighttheme = false;
 
 const defaultdarkcolors = {
@@ -158,36 +159,78 @@ function resetallcolors() {
   updatecolors();
 }
 
-async function fetchuserdata(userid) {
-  try {
-    const response = await fetch(`https://api.lanyard.rest/v1/users/${userid}`);
-    const data = await response.json();
-    if (data?.success && data.data) return data.data;
-  } catch (error) {
-    console.error('fetch error:', error);
+function connectwebsocket(userid) {
+  if (websocket && websocket.readyState === WebSocket.OPEN) {
+    websocket.close();
   }
-  return null;
+  
+  websocket = new WebSocket('wss://api.lanyard.rest/socket');
+  
+  websocket.onopen = () => {
+    const initpayload = {
+      op: 2,
+      d: {
+        subscribe_to_id: userid
+      }
+    };
+    websocket.send(JSON.stringify(initpayload));
+  };
+  
+  websocket.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      handlewebsocketmessage(data);
+    } catch (error) {
+      console.error('websocket message error:', error);
+    }
+  };
+  
+  websocket.onclose = () => {
+    if (currentuser) {
+      schedulewebsocketreconnect(userid);
+    }
+  };
+  
+  websocket.onerror = (error) => {
+    console.error('websocket error:', error);
+  };
 }
 
-function startrefreshloop(userid) {
-  stoprefreshloop();
-  refreshinterval = setInterval(async () => {
-    try {
-      const newdata = await fetchuserdata(userid);
-      if (newdata) {
-        userdata = newdata;
+function handlewebsocketmessage(data) {
+  switch (data.op) {
+    case 0:
+      if (data.d) {
+        userdata = data.d;
         updateembedframe();
       }
-    } catch (error) {
-      console.error('refresh error:', error);
-    }
-  }, 10000);
+      break;
+    case 1:
+      if (websocket && websocket.readyState === WebSocket.OPEN) {
+        websocket.send(JSON.stringify({ op: 3 }));
+      }
+      break;
+  }
 }
 
-function stoprefreshloop() {
-  if (refreshinterval) {
-    clearInterval(refreshinterval);
-    refreshinterval = null;
+function schedulewebsocketreconnect(userid) {
+  if (reconnecttimeout) {
+    clearTimeout(reconnecttimeout);
+  }
+  reconnecttimeout = setTimeout(() => {
+    if (currentuser === userid) {
+      connectwebsocket(userid);
+    }
+  }, 3000);
+}
+
+function closewebsocket() {
+  if (websocket) {
+    websocket.close();
+    websocket = null;
+  }
+  if (reconnecttimeout) {
+    clearTimeout(reconnecttimeout);
+    reconnecttimeout = null;
   }
 }
 
@@ -225,13 +268,12 @@ loadbtn.addEventListener('click', async () => {
   
   try {
     currentuser = userid;
-    userdata = await fetchuserdata(userid);
+    connectwebsocket(userid);
     updateembedframe();
-    startrefreshloop(userid);
-    shownotif('discord data loaded successfully! updates every 10 seconds', 'success');
+    shownotif('connected to real-time updates!', 'success');
   } catch (error) {
     console.error('loading error:', error);
-    shownotif('failed to load discord data. check the id and try again.', 'error');
+    shownotif('failed to connect. check the id and try again.', 'error');
   } finally {
     loadbtn.textContent = 'load';
     loadbtn.disabled = false;
@@ -243,8 +285,8 @@ clearbtn.addEventListener('click', () => {
   customtxtbox.value = '';
   currentuser = null;
   userdata = null;
+  closewebsocket();
   updateembedframe();
-  stoprefreshloop();
   shownotif('cleared all data', 'success');
 });
 
@@ -330,14 +372,14 @@ darkmodebutton.addEventListener('click', () => switchtheme(false));
 lightmodebutton.addEventListener('click', () => switchtheme(true));
 
 window.addEventListener('beforeunload', () => {
-  stoprefreshloop();
+  closewebsocket();
 });
 
 async function loadcreditsinfo() {
   const userids = ['1170109139989561464', '1106121476932898946'];
   
   try {
-    const promises = userids.map(id => fetchuserdata(id));
+    const promises = userids.map(id => fetch(`https://api.lanyard.rest/v1/users/${id}`).then(r => r.json()).then(d => d.success ? d.data : null));
     const results = await Promise.all(promises);
     creditscontainer.innerHTML = '';
     
