@@ -1,15 +1,10 @@
 RewriteEngine On
 
-# remove html 
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^([^\.]+)$ $1.html [NC,L]
-
-# redirect
 RewriteCond %{THE_REQUEST} /([^.]+)\.html [NC]
 RewriteRule ^ /%1? [NC,L,R=301]
-
-# routes
 RewriteRule ^home$ index.html [NC,L]
-RewriteRule ^credits$ dala/credits.html [NC,L]
-RewriteRule ^changelogs$ dala/changelogs.html [NC,L]
+RewriteRule ^credits$ credits.html [NC,L]
+RewriteRule ^changelogs$ changelogs.html [NC,L]
