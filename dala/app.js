@@ -105,13 +105,13 @@ function loadwebfont(fontname) {
     
     const fontmap = {
       inter: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
-      playfair: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&display=swap',
+      merriweather: 'https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&display=swap',
       firacode: 'https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap',
-      poppins: 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap',
-      sourceserif: 'https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&display=swap',
-      jetbrains: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap',
-      crimsontext: 'https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&display=swap',
-      spacegrotesk: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap'
+      dancingscript: 'https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap',
+      oswald: 'https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap',
+      pacifico: 'https://fonts.googleapis.com/css2?family=Pacifico&display=swap',
+      inconsolata: 'https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;400;500;700&display=swap',
+      lobster: 'https://fonts.googleapis.com/css2?family=Lobster&display=swap'
     };
     
     if (fontmap[fontname] && !loadedfonts[fontname]) {
@@ -141,26 +141,26 @@ function setfont(elementtype, fontvalue) {
     case 'inter':
       fontfamily = '"Inter", sans-serif';
       break;
-    case 'playfair':
-      fontfamily = '"Playfair Display", serif';
+    case 'merriweather':
+      fontfamily = '"Merriweather", serif';
       break;
     case 'firacode':
       fontfamily = '"Fira Code", monospace';
       break;
-    case 'poppins':
-      fontfamily = '"Poppins", sans-serif';
+    case 'dancingscript':
+      fontfamily = '"Dancing Script", cursive';
       break;
-    case 'sourceserif':
-      fontfamily = '"Source Serif Pro", serif';
+    case 'oswald':
+      fontfamily = '"Oswald", sans-serif';
       break;
-    case 'jetbrains':
-      fontfamily = '"JetBrains Mono", monospace';
+    case 'pacifico':
+      fontfamily = '"Pacifico", cursive';
       break;
-    case 'crimsontext':
-      fontfamily = '"Crimson Text", serif';
+    case 'inconsolata':
+      fontfamily = '"Inconsolata", monospace';
       break;
-    case 'spacegrotesk':
-      fontfamily = '"Space Grotesk", sans-serif';
+    case 'lobster':
+      fontfamily = '"Lobster", cursive';
       break;
   }
   
@@ -171,7 +171,7 @@ async function applyfont(selectelement, elementtype) {
   const fontvalue = selectelement.value;
   
   try {
-    if (['inter', 'playfair', 'firacode', 'poppins', 'sourceserif', 'jetbrains', 'crimsontext', 'spacegrotesk'].includes(fontvalue)) {
+    if (['inter', 'merriweather', 'firacode', 'dancingscript', 'oswald', 'pacifico', 'inconsolata', 'lobster'].includes(fontvalue)) {
       await loadwebfont(fontvalue);
     }
     
