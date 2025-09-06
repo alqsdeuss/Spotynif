@@ -36,228 +36,6 @@
   --progress-fill-color: #ffffff;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Add these styles to your existing styles.css file */
-
-/* Font customization styles */
-.fontgrid {
-  display: grid;
-  gap: 14px;
-}
-
-.fontrow {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.fontlabel {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  text-transform: lowercase;
-  letter-spacing: 0.3px;
-}
-
-.fontcontrols {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.fontselect {
-  flex: 1;
-  padding: 8px 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-size: 11px;
-  font-family: inherit;
-  cursor: pointer;
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.fontselect:hover {
-  border-color: var(--border-medium);
-}
-
-.fontselect:focus {
-  border-color: var(--text-primary);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
-}
-
-.fontuploadbtn {
-  width: 32px;
-  height: 32px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  cursor: pointer;
-  outline: none;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  flex-shrink: 0;
-}
-
-.fontuploadbtn:hover {
-  border-color: var(--text-primary);
-  background: var(--bg-secondary);
-  transform: scale(1.05);
-}
-
-.fontuploadbtn:active {
-  transform: scale(0.95);
-}
-
-/* Font loading overlay */
-.fontloading {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: var(--radius-md);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  z-index: 100;
-  animation: fadein 0.3s ease-out;
-}
-
-.fontspinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--border-subtle);
-  border-top: 3px solid var(--text-primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
-}
-
-.fontloadingtext {
-  font-size: 12px;
-  color: var(--text-secondary);
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  text-transform: lowercase;
-  opacity: 0;
-  animation: fadein 0.6s ease-out 0.3s forwards;
-}
-
-/* Font upload animation */
-.fontupload-success {
-  background: #22c55e !important;
-  border-color: #22c55e !important;
-  color: white !important;
-  animation: successPulse 0.4s ease-out;
-}
-
-@keyframes successPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1.05); }
-}
-
-/* Mobile responsive adjustments for font controls */
-@media (max-width: 768px) {
-  .fontcontrols {
-    flex-direction: column;
-    gap: 6px;
-  }
-  
-  .fontselect {
-    width: 100%;
-  }
-  
-  .fontuploadbtn {
-    width: 100%;
-    height: 36px;
-    justify-content: center;
-    gap: 8px;
-  }
-  
-  .fontuploadbtn::after {
-    content: 'upload font';
-    font-size: 11px;
-    font-weight: 500;
-  }
-}
-
-@media (max-width: 480px) {
-  .fontgrid {
-    gap: 12px;
-  }
-  
-  .fontrow {
-    gap: 6px;
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .navigationbuttons {
   margin-top: 48px;
   padding-top: 32px;
@@ -1657,6 +1435,168 @@ html, body {
   padding: 20px;
   color: #ef4444;
   font-size: 12px;
+}
+
+
+.fontgrid {
+  display: grid;
+  gap: 14px;
+}
+
+.fontrow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fontlabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: lowercase;
+  letter-spacing: 0.3px;
+}
+
+.fontcontrols {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fontselect {
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.fontselect:hover {
+  border-color: var(--border-medium);
+}
+
+.fontselect:focus {
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+.fontuploadbtn {
+  width: 32px;
+  height: 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.fontuploadbtn:hover {
+  border-color: var(--text-primary);
+  background: var(--bg-secondary);
+  transform: scale(1.05);
+}
+
+.fontuploadbtn:active {
+  transform: scale(0.95);
+}
+
+.fontloading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 100;
+  animation: fadein 0.3s ease-out;
+}
+
+.fontspinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-subtle);
+  border-top: 3px solid var(--text-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+}
+
+.fontloadingtext {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: lowercase;
+  opacity: 0;
+  animation: fadein 0.6s ease-out 0.3s forwards;
+}
+
+.fontupload-success {
+  background: #22c55e !important;
+  border-color: #22c55e !important;
+  color: white !important;
+  animation: successPulse 0.4s ease-out;
+}
+
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1.05); }
+}
+
+@media (max-width: 768px) {
+  .fontcontrols {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .fontselect {
+    width: 100%;
+  }
+  
+  .fontuploadbtn {
+    width: 100%;
+    height: 36px;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .fontuploadbtn::after {
+    content: 'upload font';
+    font-size: 11px;
+    font-weight: 500;
+  }
+}
+
+@media (max-width: 480px) {
+  .fontgrid {
+    gap: 12px;
+  }
+  
+  .fontrow {
+    gap: 6px;
+  }
 }
 
 .notifcontainer {
