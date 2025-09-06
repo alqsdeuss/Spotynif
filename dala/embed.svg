@@ -1,18 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none">
   <rect width="24" height="24" rx="5" fill="#0b0b0b"/>
-  <rect x="4" y="9" width="2" height="6" fill="#ffffff" rx="0.3"/>
-  <polygon points="4,9 5,7 6,9" fill="#cccccc"/>
-  <polygon points="4,15 5,16 6,15" fill="#4b4b4b"/>
-  <rect x="7" y="8" width="2" height="7" fill="#ffffff" rx="0.3"/>
-  <polygon points="7,8 8,6 9,8" fill="#cccccc"/>
-  <polygon points="7,15 8,16 9,15" fill="#4b4b4b"/>
-  <rect x="10" y="10" width="2" height="5" fill="#ffffff" rx="0.3"/>
-  <polygon points="10,10 11,8 12,10" fill="#cccccc"/>
-  <polygon points="10,15 11,16 12,15" fill="#4b4b4b"/>
-  <rect x="13" y="7" width="2" height="8" fill="#ffffff" rx="0.3"/>
-  <polygon points="13,7 14,5 15,7" fill="#cccccc"/>
-  <polygon points="13,15 14,16 15,15" fill="#4b4b4b"/>
-  <rect x="16" y="9" width="2" height="6" fill="#ffffff" rx="0.3"/>
-  <polygon points="16,9 17,7 18,9" fill="#cccccc"/>
-  <polygon points="16,15 17,16 18,15" fill="#4b4b4b"/>
+  <rect x="11" y="7" width="2" height="10" fill="#ffffff" rx="0.3"/>
+  <polygon points="11,7 12,5 13,7" fill="#4b4b4b"/>
 </svg>
