@@ -367,21 +367,10 @@
 }
 
 .versionheader {
-  display: flex;
-  align-items: center;
-  gap: 20px;
   padding: 24px;
   background: var(--bg-card);
   border-bottom: 1px solid var(--border-subtle);
-}
-
-.versionimage {
-  width: 70px;
-  height: 70px;
-  border-radius: var(--radius-md);
-  object-fit: cover;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  flex-shrink: 0;
+  text-align: center;
 }
 
 .versionnumber {
@@ -452,6 +441,34 @@
 
 .changelist li:hover {
   color: var(--text-primary);
+}
+
+.versionbanner {
+  width: 100%;
+  margin-top: 24px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  transition: all 0.3s ease;
+}
+
+.versionbanner:hover {
+  border-color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.bannerimage {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.versionbanner:hover .bannerimage {
+  transform: scale(1.02);
 }
 
 @media (max-width: 768px) {
@@ -494,19 +511,15 @@
   }
   
   .versionheader {
-    flex-direction: column;
-    text-align: center;
-    gap: 16px;
     padding: 20px;
-  }
-  
-  .versionimage {
-    width: 60px;
-    height: 60px;
   }
   
   .versioncontent {
     padding: 20px;
+  }
+  
+  .bannerimage {
+    height: 100px;
   }
 }
 
@@ -547,408 +560,15 @@
     width: 44px;
     height: 44px;
   }
-}
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  z-index: 10000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 20px;
-}
-
-.modaloverlay.modalactive {
-  opacity: 1;
-  visibility: visible;
-}
-
-.modalcontent {
-  background: var(--bg-card);
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-xl);
-  max-width: 900px;
-  width: 100%;
-  max-height: 80vh;
-  box-shadow: var(--shadow-strong);
-  position: relative;
-  transform: scale(0.8) translateY(40px);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-}
-
-.modalactive .modalcontent {
-  transform: scale(1) translateY(0);
-}
-
-.modalclose {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-secondary);
-  border-radius: 50%;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10001;
-  font-size: 16px;
-}
-
-.modalclose:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  border-color: var(--text-primary);
-  transform: scale(1.1);
-}
-
-.modalinner {
-  padding: 40px;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-.modalheader {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.modallogo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.modallogo h1 {
-  font-size: 32px;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -1px;
-  text-transform: lowercase;
-}
-
-.modalsubtitle {
-  font-size: 14px;
-  color: var(--text-muted);
-  font-weight: 400;
-  letter-spacing: 0.5px;
-}
-
-.modalcredits {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.creditsgrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.creditcard {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.creditcard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-  transition: left 0.6s ease;
-}
-
-.creditcard:hover::before {
-  left: 100%;
-}
-
-.creditcard:hover {
-  border-color: var(--text-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-.creditheader {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.creditavatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--border-subtle);
-  transition: all 0.3s ease;
-}
-
-.creditcard:hover .creditavatar {
-  border-color: var(--text-primary);
-  transform: scale(1.05);
-}
-
-.credituserinfo h3 {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-}
-
-.creditrole {
-  font-size: 12px;
-  color: var(--text-secondary);
-  font-weight: 500;
-  text-transform: lowercase;
-  letter-spacing: 0.3px;
-  margin-bottom: 2px;
-}
-
-.credituserid {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-family: inherit;
-}
-
-.creditstatus {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-  padding: 8px 12px;
-  background: var(--bg-card);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-subtle);
-}
-
-.creditspotify {
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
-  padding: 14px;
-  border: 1px solid var(--border-subtle);
-}
-
-.creditspotify.notlistening {
-  opacity: 0.6;
-}
-
-.spotifytrack {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.spotifyartist {
-  font-size: 11px;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.modalchangelogs {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.versioncard {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.versioncard:hover {
-  border-color: var(--text-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-.versionheader {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 24px;
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.versionimage {
-  width: 70px;
-  height: 70px;
-  border-radius: var(--radius-md);
-  object-fit: cover;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  flex-shrink: 0;
-}
-
-.versionnumber {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-  text-transform: lowercase;
-}
-
-.versiondate {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 400;
-}
-
-.versioncontent {
-  padding: 24px;
-}
-
-.sectiontitle {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 16px 0 12px 0;
-  text-transform: lowercase;
-  letter-spacing: 0.3px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sectiontitle:first-child {
-  margin-top: 0;
-}
-
-.sectiontitle::before {
-  content: '';
-  width: 3px;
-  height: 14px;
-  background: var(--text-primary);
-  border-radius: 2px;
-}
-
-.changelist {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.changelist li {
-  padding: 6px 0;
-  color: var(--text-secondary);
-  font-size: 13px;
-  line-height: 1.5;
-  position: relative;
-  padding-left: 18px;
-  transition: color 0.2s ease;
-}
-
-.changelist li::before {
-  content: '•';
-  position: absolute;
-  left: 0;
-  color: var(--text-primary);
-  font-weight: bold;
-}
-
-.changelist li:hover {
-  color: var(--text-primary);
-}
-
-@media (max-width: 768px) {
-  .modalinner {
-    padding: 30px 20px;
-  }
-  
-  .modalclose {
-    top: 15px;
-    right: 15px;
-    width: 36px;
-    height: 36px;
-  }
-  
-  .creditsgrid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  
-  .creditcard {
-    padding: 18px;
-  }
   
   .versionheader {
-    flex-direction: column;
-    text-align: center;
-    gap: 16px;
-    padding: 20px;
-  }
-  
-  .versionimage {
-    width: 60px;
-    height: 60px;
-  }
-  
-  .versioncontent {
-    padding: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .modaloverlay {
-    padding: 10px;
-  }
-  
-  .modalinner {
-    padding: 20px 16px;
-  }
-  
-  .modallogo h1 {
-    font-size: 24px;
-  }
-  
-  .creditcard {
     padding: 16px;
   }
   
-  .creditheader {
-    gap: 12px;
-  }
-  
-  .creditavatar {
-    width: 44px;
-    height: 44px;
+  .bannerimage {
+    height: 80px;
   }
 }
-
-
 
 
 
