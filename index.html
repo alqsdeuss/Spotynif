@@ -313,10 +313,10 @@
 
     <section class="navigationbuttons">
       <div class="navbuttongrid">
-        <a href="/credits" class="navbtn" onclick="navigate('/credits'); return false;">
+        <button class="navbtn" onclick="openmodal('credits')">
           <i class="fas fa-star"></i>
           <span>credits</span>
-        </a>
+        </button>
         <a href="https://paypal.me/advzicbro" target="_blank" class="navbtn">
           <i class="fas fa-heart"></i>
           <span>donate</span>
@@ -325,14 +325,168 @@
           <i class="fab fa-discord"></i>
           <span>support</span>
         </a>
-        <a href="/changelogs" class="navbtn" onclick="navigate('/changelogs'); return false;">
+        <button class="navbtn" onclick="openmodal('changelogs')">
           <i class="fas fa-clock"></i>
           <span>changelogs</span>
-        </a>
+        </button>
       </div>
     </section>
+
+    <div id="modaloverlay" class="modaloverlay">
+      <div id="modalcontent" class="modalcontent">
+        <button class="modalclose" onclick="closemodal()">
+          <i class="fas fa-times"></i>
+        </button>
+        <div id="modalinner" class="modalinner">
+        </div>
+      </div>
+    </div>
   </main>
   
   <script type="module" src="dala/app.js"></script>
+  <script>
+    function openmodal(type) {
+      const overlay = document.getElementById('modaloverlay');
+      const content = document.getElementById('modalinner');
+      
+      if (type === 'credits') {
+        content.innerHTML = `
+          <header class="modalheader">
+            <div class="modallogo">
+              <div class="logodot"></div>
+              <h1>credits</h1>
+            </div>
+            <p class="modalsubtitle">people behind spotynif project</p>
+          </header>
+          
+          <section class="modalcredits">
+            <div class="creditsgrid" id="modalcreditsgrid">
+              <div class="loadingstate">loading credits information...</div>
+            </div>
+          </section>
+        `;
+        loadmodalcredits();
+      } else if (type === 'changelogs') {
+        content.innerHTML = `
+          <header class="modalheader">
+            <div class="modallogo">
+              <div class="logodot"></div>
+              <h1>changelogs</h1>
+            </div>
+            <p class="modalsubtitle">version history and updates</p>
+          </header>
+          
+          <section class="modalchangelogs">
+            <div class="versioncard">
+              <div class="versionheader">
+                <img src="https://i.pinimg.com/1200x/aa/de/fd/aadefdf04b3bbe4d5517d2cb4e4ffde8.jpg" alt="Version 1 Update" class="versionimage">
+                <div class="versioninfo">
+                  <h2 class="versionnumber">version 1</h2>
+                  <div class="versiondate">september 6, 2025</div>
+                </div>
+              </div>
+              <div class="versioncontent">
+                <h3 class="sectiontitle">improvements</h3>
+                <ul class="changelist">
+                  <li>enhanced card visual effects and animations</li>
+                  <li>improved stability and performance</li>
+                  <li>better responsiveness across different screen sizes</li>
+                  <li>refined color customization system</li>
+                </ul>
+                
+                <h3 class="sectiontitle">fixes</h3>
+                <ul class="changelist">
+                  <li>temporarily removed typing effect due to multiple card bugs</li>
+                  <li>fixed progress bar animation issues</li>
+                  <li>resolved layout problems on mobile devices</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+        `;
+      }
+      
+      overlay.classList.add('modalactive');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closemodal() {
+      const overlay = document.getElementById('modaloverlay');
+      overlay.classList.remove('modalactive');
+      document.body.style.overflow = 'auto';
+    }
+    
+    async function loadmodalcredits() {
+      const userids = ['1170109139989561464', '1106121476932898946'];
+      const creditsgrid = document.getElementById('modalcreditsgrid');
+      
+      try {
+        const promises = userids.map(id => 
+          fetch(`https://api.lanyard.rest/v1/users/${id}`)
+            .then(r => r.json())
+            .then(d => d.success ? d.data : null)
+        );
+        
+        const results = await Promise.all(promises);
+        creditsgrid.innerHTML = '';
+        
+        results.forEach((data, index) => {
+          const creditcard = document.createElement('div');
+          creditcard.className = 'creditcard';
+          
+          if (data) {
+            const user = data.discord_user;
+            const spotify = data.spotify;
+            
+            creditcard.innerHTML = `
+              <div class="creditheader">
+                <img class="creditavatar" src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="${user.username}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+                <div class="credituserinfo">
+                  <h3>${user.global_name || user.username}</h3>
+                  <div class="creditrole">${index === 0 ? 'lead developer' : 'contributor'}</div>
+                  <div class="credituserid">${user.id}</div>
+                </div>
+              </div>
+              <div class="creditstatus">
+                <div class="statusindicator status${data.discord_status}"></div>
+                <span class="statustext">${data.discord_status}</span>
+              </div>
+              <div class="creditspotify ${!spotify ? 'notlistening' : ''}">
+                ${spotify ? `
+                  <div class="spotifytrack">${spotify.song}</div>
+                  <div class="spotifyartist">by ${spotify.artist}</div>
+                ` : `
+                  <div class="spotifytrack">not listening to spotify</div>
+                `}
+              </div>
+            `;
+          } else {
+            creditcard.innerHTML = `
+              <div class="errorstate">
+                <div>failed to load user data</div>
+                <div class="credituserid">${userids[index]}</div>
+              </div>
+            `;
+          }
+          
+          creditsgrid.appendChild(creditcard);
+        });
+      } catch (error) {
+        creditsgrid.innerHTML = '<div class="errorstate">failed to load credits information</div>';
+      }
+    }
+    
+    document.getElementById('modaloverlay').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closemodal();
+      }
+    });
+    
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closemodal();
+      }
+    });
+  </script>
 </body>
 </html>
