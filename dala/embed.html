@@ -51,55 +51,6 @@
     .customtext {
       font-family: var(--customtext-font) !important;
     }
-
-    .fontloading {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-radius: var(--radius-md, 10px);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      z-index: 100;
-      animation: fadein 0.3s ease-out;
-    }
-
-    .fontspinner {
-      width: 32px;
-      height: 32px;
-      border: 3px solid rgba(255, 255, 255, 0.2);
-      border-top: 3px solid rgba(255, 255, 255, 0.8);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
-    }
-
-    .fontloadingtext {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.7);
-      font-weight: 500;
-      letter-spacing: 0.5px;
-      text-transform: lowercase;
-      opacity: 0;
-      animation: fadein 0.6s ease-out 0.3s forwards;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes fadein {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
   </style>
 </head>
 <body>
@@ -159,42 +110,32 @@
           case 'default':
             fontfamily = 'inherit';
             break;
-          case 'arial':
-            fontfamily = 'Arial, sans-serif';
+          case 'inter':
+            fontfamily = '"Inter", sans-serif';
             break;
-          case 'helvetica':
-            fontfamily = 'Helvetica, Arial, sans-serif';
+          case 'playfair':
+            fontfamily = '"Playfair Display", serif';
             break;
-          case 'times':
-            fontfamily = '"Times New Roman", Times, serif';
+          case 'firacode':
+            fontfamily = '"Fira Code", monospace';
             break;
-          case 'georgia':
-            fontfamily = 'Georgia, serif';
+          case 'poppins':
+            fontfamily = '"Poppins", sans-serif';
             break;
-          case 'courier':
-            fontfamily = '"Courier New", Courier, monospace';
+          case 'sourceserif':
+            fontfamily = '"Source Serif Pro", serif';
             break;
-          case 'verdana':
-            fontfamily = 'Verdana, sans-serif';
+          case 'jetbrains':
+            fontfamily = '"JetBrains Mono", monospace';
             break;
-          case 'roboto':
-            fontfamily = '"Roboto", sans-serif';
+          case 'crimsontext':
+            fontfamily = '"Crimson Text", serif';
             break;
-          case 'opensans':
-            fontfamily = '"Open Sans", sans-serif';
-            break;
-          case 'lato':
-            fontfamily = '"Lato", sans-serif';
-            break;
-          case 'montserrat':
-            fontfamily = '"Montserrat", sans-serif';
+          case 'spacegrotesk':
+            fontfamily = '"Space Grotesk", sans-serif';
             break;
           default:
-            if (fontvalue.startsWith('custom-')) {
-              fontfamily = `"${fontvalue}", sans-serif`;
-            } else {
-              fontfamily = 'inherit';
-            }
+            fontfamily = 'inherit';
         }
         
         documentroot.style.setProperty(`--${elementtype}-font`, fontfamily);
@@ -203,10 +144,14 @@
       function loadgooglefont(fontname) {
         return new Promise((resolve) => {
           const fontmap = {
-            roboto: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap',
-            opensans: 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap',
-            lato: 'https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap',
-            montserrat: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap'
+            inter: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
+            playfair: 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&display=swap',
+            firacode: 'https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap',
+            poppins: 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap',
+            sourceserif: 'https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&display=swap',
+            jetbrains: 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap',
+            crimsontext: 'https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&display=swap',
+            spacegrotesk: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap'
           };
           
           if (fontmap[fontname] && !document.querySelector(`link[href="${fontmap[fontname]}"]`)) {
@@ -222,38 +167,6 @@
         });
       }
 
-      let fontloadingoverlay = null;
-
-      function showfontloadingoverlay() {
-        if (fontloadingoverlay) return;
-        
-        fontloadingoverlay = document.createElement('div');
-        fontloadingoverlay.className = 'fontloading';
-        fontloadingoverlay.innerHTML = `
-          <div class="fontspinner"></div>
-          <div class="fontloadingtext">loading font...</div>
-        `;
-        
-        if (playercard) {
-          playercard.appendChild(fontloadingoverlay);
-        }
-      }
-
-      function hidefontloadingoverlay() {
-        if (fontloadingoverlay && fontloadingoverlay.parentNode) {
-          fontloadingoverlay.parentNode.removeChild(fontloadingoverlay);
-          fontloadingoverlay = null;
-        }
-      }
-
-      window.addEventListener('message', function(event) {
-        if (event.data && event.data.action === 'showFontLoading') {
-          showfontloadingoverlay();
-        } else if (event.data && event.data.action === 'hideFontLoading') {
-          hidefontloadingoverlay();
-        }
-      });
-
       async function initfonts() {
         const fonts = [
           { value: songfont, type: 'song' },
@@ -262,7 +175,7 @@
           { value: customtextfont, type: 'customtext' }
         ];
 
-        const googlefonts = fonts.filter(f => ['roboto', 'opensans', 'lato', 'montserrat'].includes(f.value));
+        const googlefonts = fonts.filter(f => ['inter', 'playfair', 'firacode', 'poppins', 'sourceserif', 'jetbrains', 'crimsontext', 'spacegrotesk'].includes(f.value));
         
         if (googlefonts.length > 0) {
           await Promise.all(googlefonts.map(f => loadgooglefont(f.value)));
@@ -438,21 +351,13 @@
         
         if (tracktitle) {
           const songtitle = spotifyinfo?.song ?? '— not listening';
-          if (songeffect === 'typing') {
-            animatetyping(tracktitle, songtitle);
-          } else {
-            tracktitle.textContent = songtitle;
-          }
+          tracktitle.textContent = songtitle;
         }
         
         if (trackartist && showartist) {
           if (spotifyinfo?.artist) {
             const artistname = spotifyinfo.artist;
-            if (artisteffect === 'typing') {
-              animatetyping(trackartist, artistname);
-            } else {
-              trackartist.textContent = artistname;
-            }
+            trackartist.textContent = artistname;
             trackartist.style.display = 'block';
           } else {
             trackartist.style.display = 'none';
@@ -471,11 +376,7 @@
         if (username && showusername) {
           if (discorduser) {
             const displayname = `@${discorduser}`;
-            if (usernameeffect === 'typing') {
-              animatetyping(username, displayname);
-            } else {
-              username.textContent = displayname;
-            }
+            username.textContent = displayname;
             username.style.display = 'block';
           } else {
             username.style.display = 'none';
@@ -487,26 +388,6 @@
         }
         
         lastspotifydata = spotifyinfo;
-      }
-
-      function animatetyping(element, text) {
-        element.style.width = '0';
-        element.style.overflow = 'hidden';
-        element.style.whiteSpace = 'nowrap';
-        element.textContent = '';
-        
-        let i = 0;
-        const typeinterval = setInterval(() => {
-          if (i < text.length) {
-            element.textContent += text.charAt(i);
-            i++;
-          } else {
-            clearInterval(typeinterval);
-            element.style.width = 'auto';
-            element.style.overflow = 'visible';
-            element.style.whiteSpace = 'nowrap';
-          }
-        }, 50);
       }
 
       function updateprogress() {
