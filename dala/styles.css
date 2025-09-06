@@ -61,6 +61,8 @@
 
 
 
+/* Add these styles to your existing styles.css file */
+
 /* Font customization styles */
 .fontgrid {
   display: grid;
@@ -177,18 +179,6 @@
   animation: fadein 0.6s ease-out 0.3s forwards;
 }
 
-/* Custom font classes */
-.font-arial { font-family: Arial, sans-serif !important; }
-.font-helvetica { font-family: Helvetica, Arial, sans-serif !important; }
-.font-times { font-family: "Times New Roman", Times, serif !important; }
-.font-georgia { font-family: Georgia, serif !important; }
-.font-courier { font-family: "Courier New", Courier, monospace !important; }
-.font-verdana { font-family: Verdana, sans-serif !important; }
-.font-roboto { font-family: "Roboto", sans-serif !important; }
-.font-opensans { font-family: "Open Sans", sans-serif !important; }
-.font-lato { font-family: "Lato", sans-serif !important; }
-.font-montserrat { font-family: "Montserrat", sans-serif !important; }
-
 /* Font upload animation */
 .fontupload-success {
   background: #22c55e !important;
@@ -237,8 +227,6 @@
     gap: 6px;
   }
 }
-
-
 
 
 
