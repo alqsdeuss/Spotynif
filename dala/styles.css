@@ -36,6 +36,121 @@
   --progress-fill-color: #ffffff;
 }
 
+
+
+
+
+
+
+.navigationbuttons {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.navbuttongrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.navbtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+.navbtn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.navbtn:hover::before {
+  left: 100%;
+}
+
+.navbtn:hover {
+  transform: translateY(-8px);
+  border-color: var(--text-primary);
+  box-shadow: var(--shadow-strong);
+  background: var(--bg-secondary);
+}
+
+.navbtn i {
+  font-size: 24px;
+  transition: all 0.3s ease;
+}
+
+.navbtn:hover i {
+  transform: scale(1.2);
+  text-shadow: 0 0 16px currentColor;
+}
+
+.navbtn span {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: lowercase;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+  .navbuttongrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .navbtn {
+    padding: 20px 12px;
+    gap: 10px;
+  }
+  
+  .navbtn i {
+    font-size: 20px;
+  }
+  
+  .navbtn span {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbuttongrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .navbtn {
+    flex-direction: row;
+    justify-content: center;
+    padding: 16px;
+    gap: 12px;
+  }
+}
+
+
+
+
+
+
 .cardlight {
   --player-bg: #ffffff;
   --player-text: #000000;
