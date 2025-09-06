@@ -26,6 +26,79 @@
     #embedroot {
       width: 100%;
       max-width: 420px;
+      position: relative;
+    }
+
+    :root {
+      --song-font: inherit;
+      --artist-font: inherit;
+      --username-font: inherit;
+      --customtext-font: inherit;
+    }
+
+    .song {
+      font-family: var(--song-font) !important;
+    }
+
+    .artist {
+      font-family: var(--artist-font) !important;
+    }
+
+    .username {
+      font-family: var(--username-font) !important;
+    }
+
+    .customtext {
+      font-family: var(--customtext-font) !important;
+    }
+
+    .fontloading {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: var(--radius-md, 10px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 100;
+      animation: fadein 0.3s ease-out;
+    }
+
+    .fontspinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      border-top: 3px solid rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+    }
+
+    .fontloadingtext {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: lowercase;
+      opacity: 0;
+      animation: fadein 0.6s ease-out 0.3s forwards;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadein {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
   </style>
 </head>
@@ -60,6 +133,10 @@
       const progressstyle = urlparams.get('progressStyle') || 'default';
       const progressheight = urlparams.get('progressHeight') || '6';
       const progressradius = urlparams.get('progressRadius') || '3';
+      const songfont = urlparams.get('songFont') || 'default';
+      const artistfont = urlparams.get('artistFont') || 'default';
+      const usernamefont = urlparams.get('usernameFont') || 'default';
+      const customtextfont = urlparams.get('customTextFont') || 'default';
 
       if (cardtheme === 'light') {
         document.body.classList.add('cardlight');
@@ -74,6 +151,128 @@
       if (customprogressfillcolor) documentroot.style.setProperty('--progress-fill-color', customprogressfillcolor);
       documentroot.style.setProperty('--progress-height', progressheight + 'px');
       documentroot.style.setProperty('--progress-radius', progressradius + 'px');
+
+      function setfontfamily(fontvalue, elementtype) {
+        let fontfamily = '';
+        
+        switch(fontvalue) {
+          case 'default':
+            fontfamily = 'inherit';
+            break;
+          case 'arial':
+            fontfamily = 'Arial, sans-serif';
+            break;
+          case 'helvetica':
+            fontfamily = 'Helvetica, Arial, sans-serif';
+            break;
+          case 'times':
+            fontfamily = '"Times New Roman", Times, serif';
+            break;
+          case 'georgia':
+            fontfamily = 'Georgia, serif';
+            break;
+          case 'courier':
+            fontfamily = '"Courier New", Courier, monospace';
+            break;
+          case 'verdana':
+            fontfamily = 'Verdana, sans-serif';
+            break;
+          case 'roboto':
+            fontfamily = '"Roboto", sans-serif';
+            break;
+          case 'opensans':
+            fontfamily = '"Open Sans", sans-serif';
+            break;
+          case 'lato':
+            fontfamily = '"Lato", sans-serif';
+            break;
+          case 'montserrat':
+            fontfamily = '"Montserrat", sans-serif';
+            break;
+          default:
+            if (fontvalue.startsWith('custom-')) {
+              fontfamily = `"${fontvalue}", sans-serif`;
+            } else {
+              fontfamily = 'inherit';
+            }
+        }
+        
+        documentroot.style.setProperty(`--${elementtype}-font`, fontfamily);
+      }
+
+      function loadgooglefont(fontname) {
+        return new Promise((resolve) => {
+          const fontmap = {
+            roboto: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap',
+            opensans: 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap',
+            lato: 'https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap',
+            montserrat: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap'
+          };
+          
+          if (fontmap[fontname] && !document.querySelector(`link[href="${fontmap[fontname]}"]`)) {
+            const link = document.createElement('link');
+            link.href = fontmap[fontname];
+            link.rel = 'stylesheet';
+            link.onload = () => resolve();
+            link.onerror = () => resolve();
+            document.head.appendChild(link);
+          } else {
+            resolve();
+          }
+        });
+      }
+
+      let fontloadingoverlay = null;
+
+      function showfontloadingoverlay() {
+        if (fontloadingoverlay) return;
+        
+        fontloadingoverlay = document.createElement('div');
+        fontloadingoverlay.className = 'fontloading';
+        fontloadingoverlay.innerHTML = `
+          <div class="fontspinner"></div>
+          <div class="fontloadingtext">loading font...</div>
+        `;
+        
+        if (playercard) {
+          playercard.appendChild(fontloadingoverlay);
+        }
+      }
+
+      function hidefontloadingoverlay() {
+        if (fontloadingoverlay && fontloadingoverlay.parentNode) {
+          fontloadingoverlay.parentNode.removeChild(fontloadingoverlay);
+          fontloadingoverlay = null;
+        }
+      }
+
+      window.addEventListener('message', function(event) {
+        if (event.data && event.data.action === 'showFontLoading') {
+          showfontloadingoverlay();
+        } else if (event.data && event.data.action === 'hideFontLoading') {
+          hidefontloadingoverlay();
+        }
+      });
+
+      async function initfonts() {
+        const fonts = [
+          { value: songfont, type: 'song' },
+          { value: artistfont, type: 'artist' },
+          { value: usernamefont, type: 'username' },
+          { value: customtextfont, type: 'customtext' }
+        ];
+
+        const googlefonts = fonts.filter(f => ['roboto', 'opensans', 'lato', 'montserrat'].includes(f.value));
+        
+        if (googlefonts.length > 0) {
+          await Promise.all(googlefonts.map(f => loadgooglefont(f.value)));
+        }
+
+        fonts.forEach(font => {
+          setfontfamily(font.value, font.type);
+        });
+      }
+
       const rootcontainer = document.getElementById('embedroot');
 
       if (!discordid) {
@@ -98,6 +297,7 @@
       let frameanimation = null;
       let websocket = null;
       let reconnecttimeout = null;
+      
       function getprogress(spotifydata) {
         if (!spotifydata || !spotifydata.timestamps) return null;
         const starttime = spotifydata.timestamps.start;
@@ -425,7 +625,10 @@
         }
       }
 
-      connectwebsocket();
+      initfonts().then(() => {
+        connectwebsocket();
+      });
+
       window.addEventListener('beforeunload', () => {
         closewebsocket();
         if (frameanimation) cancelAnimationFrame(frameanimation);
