@@ -36,44 +36,6 @@
       --customtext-font: inherit;
     }
 
-    .song {<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>spotynif embed</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="icon" href="embed.svg" />
-  <meta name="description" content="enhanced spotify card by spotynif">
-  <style>
-    html, body, #embedroot {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-    
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px;
-      background: transparent;
-      font-family: 'NotoSansMono', 'Noto Sans Mono', monospace;
-    }
-    
-    #embedroot {
-      width: 100%;
-      max-width: 420px;
-      position: relative;
-    }
-
-    :root {
-      --song-font: inherit;
-      --artist-font: inherit;
-      --username-font: inherit;
-      --customtext-font: inherit;
-    }
-
     .song {
       font-family: var(--song-font) !important;
     }
@@ -533,9 +495,12 @@
 
       async function fetchdatafallback() {
         try {
-          const response = await fetch(`https://api.lanyard.rest/v1/users/${discordid}`);
+          const response = await fetch(`https://api.lanyard.rest/v1/users/${discordid}`, {
+            method: 'GET',
+            cache: 'no-cache'
+          });
           
-          if (response.status === 404) {
+          if (response.status === 404 || !response.ok) {
             userdataavailable = false;
             presencedata = { discord_user: null, spotify: null, discord_status: 'offline' };
             drawplayer();
