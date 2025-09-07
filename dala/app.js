@@ -42,7 +42,6 @@ const songtitlefontsel = getid('songtitlefont');
 const artistfontsel = getid('artistfont');
 const usernamefontsel = getid('usernamefont');
 const customtextfontsel = getid('customtextfont');
-
 let currentuser = null;
 let userdata = null;
 let websocket = null;
@@ -71,7 +70,6 @@ const defaultlightcolors = {
 
 function suppressconsoleerrors() {
   if (suppressconsole) return;
-  
   suppressconsole = true;
   const originalerror = console.error;
   const originalwarn = console.warn;
