@@ -49,6 +49,7 @@ let websocket = null;
 let reconnecttimeout = null;
 let islighttheme = false;
 let loadedfonts = {};
+let suppressconsole = false;
 
 const defaultdarkcolors = {
   song: '#ffffff',
@@ -67,6 +68,36 @@ const defaultlightcolors = {
   progressbg: '#e0e0e0',
   progressfill: '#000000'
 };
+
+function suppressconsoleerrors() {
+  if (suppressconsole) return;
+  
+  suppressconsole = true;
+  const originalerror = console.error;
+  const originalwarn = console.warn;
+  
+  console.error = function(...args) {
+    const message = args.join(' ').toLowerCase();
+    if (message.includes('failed to load resource') || 
+        message.includes('404') || 
+        message.includes('lanyard.rest') ||
+        message.includes('net::err_')) {
+      return;
+    }
+    originalerror.apply(console, args);
+  };
+  
+  console.warn = function(...args) {
+    const message = args.join(' ').toLowerCase();
+    if (message.includes('failed to load resource') || 
+        message.includes('404') || 
+        message.includes('lanyard.rest') ||
+        message.includes('net::err_')) {
+      return;
+    }
+    originalwarn.apply(console, args);
+  };
+}
 
 function shownotif(message, type = 'info') {
   const notif = document.createElement('div');
@@ -350,40 +381,13 @@ async function loaduser(userid) {
   loadbtn.textContent = 'loading...';
   loadbtn.disabled = true;
   
+  suppressconsoleerrors();
+  
   try {
-    const originalConsoleError = console.error;
-    const originalConsoleWarn = console.warn;
-    
-    console.error = function(...args) {
-      const message = args.join(' ');
-      if (message.includes('Failed to load resource') || message.includes('404') || message.includes('lanyard.rest')) {
-        return;
-      }
-      originalConsoleError.apply(console, args);
-    };
-    
-    console.warn = function(...args) {
-      const message = args.join(' ');
-      if (message.includes('Failed to load resource') || message.includes('404') || message.includes('lanyard.rest')) {
-        return;
-      }
-      originalConsoleWarn.apply(console, args);
-    };
-    
     const response = await fetch(`https://api.lanyard.rest/v1/users/${userid}`, {
       method: 'GET',
       cache: 'no-cache'
-    }).catch(error => {
-      if (error.message && error.message.includes('404')) {
-        return { ok: false, status: 404 };
-      }
-      throw error;
-    });
-    
-    setTimeout(() => {
-      console.error = originalConsoleError;
-      console.warn = originalConsoleWarn;
-    }, 1000);
+    }).catch(() => null);
     
     if (!response || response.status === 404 || !response.ok) {
       currentuser = userid;
@@ -549,8 +553,19 @@ async function loadcreditsinfo() {
   
   if (!creditscontainer) return;
   
+  suppressconsoleerrors();
+  
   try {
-    const promises = userids.map(id => fetch(`https://api.lanyard.rest/v1/users/${id}`).then(r => r.json()).then(d => d.success ? d.data : null));
+    const promises = userids.map(id => {
+      return fetch(`https://api.lanyard.rest/v1/users/${id}`, {
+        method: 'GET',
+        cache: 'no-cache'
+      })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => (d && d.success) ? d.data : null)
+      .catch(() => null);
+    });
+    
     const results = await Promise.all(promises);
     creditscontainer.innerHTML = '';
     
@@ -610,6 +625,7 @@ function initapp() {
   progressheightslider.value = 6;
   progressradiusslider.value = 3;
   updatecolors();
+  suppressconsoleerrors();
 }
 
 initapp();
