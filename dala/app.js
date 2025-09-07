@@ -341,8 +341,7 @@ function switchtheme(lightmode) {
   updateembedframe();
 }
 
-loadbtn.addEventListener('click', async () => {
-  const userid = useridbox.value.trim();
+async function loaduser(userid) {
   if (!userid) {
     shownotif('please enter a valid discord id', 'error');
     return;
@@ -352,16 +351,40 @@ loadbtn.addEventListener('click', async () => {
   loadbtn.disabled = true;
   
   try {
-    currentuser = userid;
-    connectwebsocket(userid);
-    updateembedframe();
-    shownotif('connected to real-time updates!', 'success');
+    const response = await fetch(`https://api.lanyard.rest/v1/users/${userid}`);
+    const jsondata = await response.json();
+    
+    if (jsondata && jsondata.success && jsondata.data) {
+      currentuser = userid;
+      connectwebsocket(userid);
+      updateembedframe();
+      shownotif('connected to real-time updates!', 'success');
+    } else {
+      shownotif('user not found or not accessible', 'error');
+    }
   } catch (error) {
     console.error('loading error:', error);
     shownotif('failed to connect. check the id and try again.', 'error');
   } finally {
     loadbtn.textContent = 'load';
     loadbtn.disabled = false;
+  }
+}
+
+loadbtn.addEventListener('click', async () => {
+  const userid = useridbox.value.trim();
+  await loaduser(userid);
+});
+
+useridbox.addEventListener('input', async (e) => {
+  const userid = e.target.value.trim();
+  if (userid.length >= 17 && userid.length <= 19 && /^\d+$/.test(userid)) {
+    await loaduser(userid);
+  } else if (!userid) {
+    currentuser = null;
+    userdata = null;
+    closewebsocket();
+    updateembedframe();
   }
 });
 
