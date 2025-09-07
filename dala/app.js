@@ -351,16 +351,45 @@ async function loaduser(userid) {
   loadbtn.disabled = true;
   
   try {
+    const originalConsoleError = console.error;
+    const originalConsoleWarn = console.warn;
+    
+    console.error = function(...args) {
+      const message = args.join(' ');
+      if (message.includes('Failed to load resource') || message.includes('404') || message.includes('lanyard.rest')) {
+        return;
+      }
+      originalConsoleError.apply(console, args);
+    };
+    
+    console.warn = function(...args) {
+      const message = args.join(' ');
+      if (message.includes('Failed to load resource') || message.includes('404') || message.includes('lanyard.rest')) {
+        return;
+      }
+      originalConsoleWarn.apply(console, args);
+    };
+    
     const response = await fetch(`https://api.lanyard.rest/v1/users/${userid}`, {
       method: 'GET',
       cache: 'no-cache'
+    }).catch(error => {
+      if (error.message && error.message.includes('404')) {
+        return { ok: false, status: 404 };
+      }
+      throw error;
     });
     
-    if (response.status === 404) {
+    setTimeout(() => {
+      console.error = originalConsoleError;
+      console.warn = originalConsoleWarn;
+    }, 1000);
+    
+    if (!response || response.status === 404 || !response.ok) {
       currentuser = userid;
       updateembedframe();
       shownotif('user not accessible - if you want to register, join https://discord.gg/Wbvjq8za7V', 'info');
-    } else if (response.ok) {
+    } else {
       const jsondata = await response.json();
       
       if (jsondata && jsondata.success && jsondata.data) {
@@ -369,12 +398,10 @@ async function loaduser(userid) {
         updateembedframe();
         shownotif('connected to real-time updates!', 'success');
       } else {
-        shownotif('user not found or not accessible', 'error');
+        currentuser = userid;
+        updateembedframe();
+        shownotif('user not accessible - if you want to register, join https://discord.gg/Wbvjq8za7V', 'info');
       }
-    } else {
-      currentuser = userid;
-      updateembedframe();
-      shownotif('user not accessible - if you want to register, join https://discord.gg/Wbvjq8za7V', 'info');
     }
   } catch (error) {
     currentuser = userid;
