@@ -514,11 +514,22 @@
       const creditsgrid = document.getElementById('modalcreditsgrid');
       
       try {
-        const promises = userids.map(id => 
-          fetch(`https://api.lanyard.rest/v1/users/${id}`)
-            .then(r => r.json())
-            .then(d => d.success ? d.data : null)
-        );
+        const promises = userids.map(async id => {
+          try {
+            const response = await fetch(`https://api.lanyard.rest/v1/users/${id}`, {
+              method: 'GET',
+              cache: 'no-cache'
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              return data.success ? data.data : null;
+            }
+            return null;
+          } catch (error) {
+            return null;
+          }
+        });
         
         const results = await Promise.all(promises);
         creditsgrid.innerHTML = '';
