@@ -520,7 +520,6 @@
           if (!response || response.status === 404 || !response.ok) {
             userdataavailable = false;
             presencedata = { discord_user: null, spotify: null, discord_status: 'offline' };
-            initialload = false;
             drawplayer();
             return;
           }
