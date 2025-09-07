@@ -524,9 +524,12 @@
         }
       }
 
-      initfonts().then(() => {
-        fetchdatafallback();
-        connectwebsocket();
+      initfonts().then(async () => {
+        createplayer();
+        await fetchdatafallback();
+        if (userdataavailable === true) {
+          connectwebsocket();
+        }
       });
 
       window.addEventListener('beforeunload', () => {
