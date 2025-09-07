@@ -352,19 +352,27 @@ async function loaduser(userid) {
   
   try {
     const response = await fetch(`https://api.lanyard.rest/v1/users/${userid}`);
-    const jsondata = await response.json();
     
-    if (jsondata && jsondata.success && jsondata.data) {
+    if (response.status === 404) {
       currentuser = userid;
-      connectwebsocket(userid);
       updateembedframe();
-      shownotif('connected to real-time updates!', 'success');
+      shownotif('user not accessible - if you want to register, join https://discord.gg/Wbvjq8za7V', 'info');
     } else {
-      shownotif('user not found or not accessible', 'error');
+      const jsondata = await response.json();
+      
+      if (jsondata && jsondata.success && jsondata.data) {
+        currentuser = userid;
+        connectwebsocket(userid);
+        updateembedframe();
+        shownotif('connected to real-time updates!', 'success');
+      } else {
+        shownotif('user not found or not accessible', 'error');
+      }
     }
   } catch (error) {
-    console.error('loading error:', error);
-    shownotif('failed to connect. check the id and try again.', 'error');
+    if (error.name !== 'TypeError') {
+      shownotif('failed to connect. check the id and try again.', 'error');
+    }
   } finally {
     loadbtn.textContent = 'load';
     loadbtn.disabled = false;
