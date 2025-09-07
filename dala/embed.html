@@ -210,6 +210,7 @@
       let frameanimation = null;
       let websocket = null;
       let reconnecttimeout = null;
+      let userdataavailable = false;
       
       function getprogress(spotifydata) {
         if (!spotifydata || !spotifydata.timestamps) return null;
@@ -350,12 +351,17 @@
         const discordstatus = presencedata.discord_status || 'offline';
         
         if (tracktitle) {
-          const songtitle = spotifyinfo?.song ?? '— not listening';
+          let songtitle;
+          if (!userdataavailable) {
+            songtitle = 'it\'s not in https://discord.gg/Wbvjq8za7V';
+          } else {
+            songtitle = spotifyinfo?.song ?? '— not listening';
+          }
           tracktitle.textContent = songtitle;
         }
         
         if (trackartist && showartist) {
-          if (spotifyinfo?.artist) {
+          if (spotifyinfo?.artist && userdataavailable) {
             const artistname = spotifyinfo.artist;
             trackartist.textContent = artistname;
             trackartist.style.display = 'block';
@@ -365,7 +371,7 @@
         }
         
         if (albumart && showalbum) {
-          if (spotifyinfo?.album_art_url) {
+          if (spotifyinfo?.album_art_url && userdataavailable) {
             albumart.src = spotifyinfo.album_art_url;
             albumart.style.display = 'block';
           } else {
@@ -374,7 +380,7 @@
         }
         
         if (username && showusername) {
-          if (discorduser) {
+          if (discorduser && userdataavailable) {
             const displayname = `@${discorduser}`;
             username.textContent = displayname;
             username.style.display = 'block';
@@ -391,7 +397,7 @@
       }
 
       function updateprogress() {
-        if (!showprogress || !lastspotifydata || !progressfill) {
+        if (!showprogress || !lastspotifydata || !progressfill || !userdataavailable) {
           if (frameanimation) frameanimation = requestAnimationFrame(updateprogress);
           return;
         }
@@ -455,6 +461,7 @@
           case 0:
             if (data.d) {
               presencedata = data.d;
+              userdataavailable = true;
               drawplayer();
             }
             break;
@@ -492,21 +499,23 @@
           const jsondata = await response.json();
           if (jsondata && jsondata.success && jsondata.data) {
             presencedata = jsondata.data;
+            userdataavailable = true;
             drawplayer();
           } else {
-            if (!playercard) {
-              rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">user not found</div><div class="artist">check discord id</div></div></div>';
-            }
+            userdataavailable = false;
+            presencedata = { discord_user: null, spotify: null, discord_status: 'offline' };
+            drawplayer();
           }
         } catch (error) {
           console.warn('fallback fetch failed:', error);
-          if (!playercard) {
-            rootcontainer.innerHTML = '<div class="player"><div class="meta"><div class="song">connection error</div><div class="artist">retrying...</div></div></div>';
-          }
+          userdataavailable = false;
+          presencedata = { discord_user: null, spotify: null, discord_status: 'offline' };
+          drawplayer();
         }
       }
 
       initfonts().then(() => {
+        fetchdatafallback();
         connectwebsocket();
       });
 
