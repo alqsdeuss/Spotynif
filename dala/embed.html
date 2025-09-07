@@ -211,6 +211,7 @@
       let websocket = null;
       let reconnecttimeout = null;
       let userdataavailable = false;
+      let initialload = true;
       
       function getprogress(spotifydata) {
         if (!spotifydata || !spotifydata.timestamps) return null;
@@ -277,7 +278,11 @@
         
         tracktitle = document.createElement('div');
         tracktitle.className = 'song';
-        tracktitle.textContent = '— not listening';
+        if (initialload && !userdataavailable) {
+          tracktitle.textContent = 'loading...';
+        } else {
+          tracktitle.textContent = '— not listening';
+        }
         applyeffect(tracktitle, songeffect);
         trackinfo.appendChild(tracktitle);
         
@@ -462,6 +467,7 @@
             if (data.d) {
               presencedata = data.d;
               userdataavailable = true;
+              initialload = false;
               drawplayer();
             }
             break;
@@ -495,14 +501,26 @@
 
       async function fetchdatafallback() {
         try {
+          const originalConsoleError = console.error;
+          const originalConsoleWarn = console.warn;
+          
+          console.error = function(...args) {};
+          console.warn = function(...args) {};
+          
           const response = await fetch(`https://api.lanyard.rest/v1/users/${discordid}`, {
             method: 'GET',
             cache: 'no-cache'
-          });
+          }).catch(() => null);
           
-          if (response.status === 404 || !response.ok) {
+          setTimeout(() => {
+            console.error = originalConsoleError;
+            console.warn = originalConsoleWarn;
+          }, 100);
+          
+          if (!response || response.status === 404 || !response.ok) {
             userdataavailable = false;
             presencedata = { discord_user: null, spotify: null, discord_status: 'offline' };
+            initialload = false;
             drawplayer();
             return;
           }
@@ -511,15 +529,18 @@
           if (jsondata && jsondata.success && jsondata.data) {
             presencedata = jsondata.data;
             userdataavailable = true;
+            initialload = false;
             drawplayer();
           } else {
             userdataavailable = false;
             presencedata = { discord_user: null, spotify: null, discord_status: 'offline' };
+            initialload = false;
             drawplayer();
           }
         } catch (error) {
           userdataavailable = false;
           presencedata = { discord_user: null, spotify: null, discord_status: 'offline' };
+          initialload = false;
           drawplayer();
         }
       }
