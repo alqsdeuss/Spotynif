@@ -351,13 +351,16 @@ async function loaduser(userid) {
   loadbtn.disabled = true;
   
   try {
-    const response = await fetch(`https://api.lanyard.rest/v1/users/${userid}`);
+    const response = await fetch(`https://api.lanyard.rest/v1/users/${userid}`, {
+      method: 'GET',
+      cache: 'no-cache'
+    });
     
     if (response.status === 404) {
       currentuser = userid;
       updateembedframe();
       shownotif('user not accessible - if you want to register, join https://discord.gg/Wbvjq8za7V', 'info');
-    } else {
+    } else if (response.ok) {
       const jsondata = await response.json();
       
       if (jsondata && jsondata.success && jsondata.data) {
@@ -368,11 +371,15 @@ async function loaduser(userid) {
       } else {
         shownotif('user not found or not accessible', 'error');
       }
+    } else {
+      currentuser = userid;
+      updateembedframe();
+      shownotif('user not accessible - if you want to register, join https://discord.gg/Wbvjq8za7V', 'info');
     }
   } catch (error) {
-    if (error.name !== 'TypeError') {
-      shownotif('failed to connect. check the id and try again.', 'error');
-    }
+    currentuser = userid;
+    updateembedframe();
+    shownotif('user not accessible - if you want to register, join https://discord.gg/Wbvjq8za7V', 'info');
   } finally {
     loadbtn.textContent = 'load';
     loadbtn.disabled = false;
